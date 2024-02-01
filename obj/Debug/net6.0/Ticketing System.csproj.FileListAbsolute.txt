@@ -1,0 +1,15 @@
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/Ticketing System
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/Ticketing System.deps.json
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/Ticketing System.runtimeconfig.json
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/Ticketing System.dll
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/Ticketing System.pdb
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.csproj.AssemblyReference.cache
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.GeneratedMSBuildEditorConfig.editorconfig
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.AssemblyInfoInputs.cache
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.AssemblyInfo.cs
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.csproj.CoreCompileInputs.cache
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.dll
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/refint/Ticketing System.dll
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.pdb
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.genruntimeconfig.cache
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/ref/Ticketing System.dll
