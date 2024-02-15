@@ -56,5 +56,7 @@ do{
             string[] arr = line.Split(",");
             Console.WriteLine("\n\nTicketID: {0}\nSummary: {1}\nStatus: {2}\nPriority: {3}\nSubmitter: {4}\nAssigned: {5}\nWatching: {6}", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6]);
         }
+
+        sr.Close();
     }
 } while(userChoice == "1" || userChoice == "2");
