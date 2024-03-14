@@ -5,6 +5,8 @@ Console.WriteLine("Hello, World!");
 
 string file = "Tickets.csv";
 string userChoice;
+
+List<Ticket> tickets = new List<Ticket>();
 do{
     Console.WriteLine("Select an Option:\n\n1) Add Ticket(s)\n2) View Tickets");
 
@@ -38,8 +40,11 @@ do{
         Console.Write("\nWho is watching this ticket? (Separate names with '|'): ");
         string watching = Console.ReadLine();
 
+        Ticket tk = new Ticket(summary, isOpen, priority, submitter, assigned, watching);
+        tickets.Append(tk);
+
         StreamWriter sw = new StreamWriter(file, append: true);
-        sw.WriteLine("{0},{1},{2},{3},{4},{5},{6}", File.ReadAllLines(file).Length + 1, summary, isOpen, priority, submitter, assigned, watching);
+        sw.WriteLine("{0},{1},{2},{3},{4},{5},{6}", File.ReadAllLines(file).Length + 1, tk.summary, tk.isOpen, tk.priority, tk.submitter, tk.assigned, tk.watching);
         sw.Close();
 
         Console.Clear();
