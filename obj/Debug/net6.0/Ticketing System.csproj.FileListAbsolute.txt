@@ -13,3 +13,5 @@
 /Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.pdb
 /Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.genruntimeconfig.cache
 /Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/ref/Ticketing System.dll
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/bin/Debug/net6.0/NLog.dll
+/Users/b260fredin/Documents/WCTC/Term 3/NET Databases/Ticketing System/obj/Debug/net6.0/Ticketing System.csproj.CopyComplete
