@@ -167,8 +167,10 @@ string getStatus() {
 }
 
 // get user's input for priority field while adding a ticket
-string getPriority() {
+Level getPriority() {
     string inp;
+    Level lev = Level.None;
+
     do {
         inp = getInput("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
@@ -181,37 +183,35 @@ string getPriority() {
             // or warns user if they did not enter "h", "m" or "l"
             switch(inp) {
                 case "h":
-                    inp = Level.High.ToString();
+                    lev = Level.High;
                     break;
                 case "m":
-                    inp = Level.Medium.ToString();
+                    lev = Level.Medium;
                     break;
                 case "l":
-                    inp = Level.Low.ToString();
+                    lev = Level.Low;
                     break;
                 default:
                     Console.WriteLine();
                     logger.Warn("Please enter \"h\", \"m\" or \"l\" only!");
-                    break;
+                    break; 
             }
         }
 
     // loop repeats until user enters "h", "m", "l", or "" (User pressed enter)
-    } while (inp != "High" 
-                && inp != "Medium" 
-                && inp != "Low" 
+    } while (inp != "h" 
+                && inp != "m" 
+                && inp != "l" 
                 && inp != ""
             )
     ;
 
-    return inp;
+    return lev;
 }
-
-
 
 // checks if user hit enter to cancel
 bool isCanceled(string input) {
-    if(input == ""){
+    if(input == "" || input == "None"){
         Console.WriteLine();
         logger.Warn("Cancelling...");
 
@@ -304,10 +304,10 @@ bool addTicket() {
         logger.Info($"Added status: {sts}");
     }
 
-    string pri = getPriority();
+    Level pri = getPriority();
 
     // checks if user hit enter to cancel
-    if(isCanceled(pri)) {
+    if(isCanceled(pri.ToString())) {
         return false;
     } else {
 
@@ -327,7 +327,7 @@ bool addTicket() {
         logger.Info($"Added priority: {sbm}");
     }
 
-    
+
 
     switch(inp) {
         case "1":
