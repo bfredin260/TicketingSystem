@@ -10,7 +10,8 @@ string choice;
 
 List<Ticket> tickets = new List<Ticket>();
 
-// main program functionality
+// ==================== MAIN PROGRAM FUNCTIONALITY ==================== //
+
 Console.WriteLine("\n   TICKETING SYSTEM\n----------------------");
 
 // loop determines user's choice ("1", "2", "3", "4", or "" to exit the program)
@@ -51,13 +52,26 @@ do{
 
 
 
-// ==================== FUNCTIONS ====================
+// ==================== FUNCTIONS ==================== //
+
+
+// ----- Basic User Input ----- //
 
 // prompts user and then returns their response (unverified)
 string getInput(string prompt) {
     Console.Write(prompt);
     
     return Console.ReadLine();
+}
+
+// shortens the input to a single character string
+string shorten(string input) {
+    // convert input to lowercase, then first character only, then back to string
+    // ("Tree" becomes "t")
+    return input.ToLower()
+                .ToCharArray()[0]
+                .ToString()
+    ;
 }
 
 // gets user's choice (used only for selecting 1-4 to add ticket, view tickets, load and save tickets)
@@ -70,19 +84,13 @@ string getChoice() {
         // if the input is NOT empty:
         if(inp != "") {
 
-            // convert input to lowercase, then first character only,
-            // then back to string ("Tree" becomes "t")
-            inp = inp.ToLower()
-                        .ToCharArray()[0]
-                        .ToString()
-            ;
+            // shorten string to one character
+            inp = shorten(inp);
 
             Console.WriteLine();
 
             // if user chose one of the four options, output it using logger
             if(inp == "1" || inp == "2" || inp == "3" || inp == "4") {
-                logger.Info($"Input: \"{inp}\"\n");
-
                 string sel;
                 switch(inp) {
                     case "1":
@@ -116,22 +124,21 @@ string getChoice() {
     return inp;
 }
 
+
+// ----- Add Ticket Choice -----
+
 // get user's input for status field while adding a ticket
 string getStatus() {
     string inp;
     do{
         // get input from user
-        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Is this ticket currently open? (y/n)\n\nEnter to cancel\n\n> ");
+        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Is this ticket currently open?\n\ny) Yes\nn) No\n\nEnter to cancel\n\n> ");
 
         // if input is NOT empty (user did NOT press enter):
         if(inp != "") {
 
-            // convert input to lowercase, then first character only, then back to string
-            // ("Tree" becomes "t")
-            inp = inp.ToLower()
-                     .ToCharArray()[0]
-                     .ToString()
-            ;
+            // shorten string to one character
+            inp = shorten(inp);
 
             // sets input to "Open" or "Closed" based on "y" or "n",
             // or warns user if they did not enter "y" or "n"
@@ -143,18 +150,64 @@ string getStatus() {
                     inp = "Closed";
                     break;
                 default:
+                    Console.WriteLine();
                     logger.Warn("Please enter \"y\" or \"n\" only!");
                     break;
             }
         }
 
     // loop repeats until user enters "y" or "n", or user presses enter to cancel
-    } while (inp != "Closed" && inp != "Open" && inp != "");
+    } while (inp != "Closed" 
+                && inp != "Open" 
+                && inp != ""
+            )
+    ;
 
     return inp;
 }
 
 // get user's input for priority field while adding a ticket
+string getPriority() {
+    string inp;
+    do {
+        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
+
+        if (inp != "") {
+
+            // shorten string to one character
+            inp = shorten(inp);
+
+            // sets input to "High", "Medium" or "Low" based on "h", "m" or "l",
+            // or warns user if they did not enter "h", "m" or "l"
+            switch(inp) {
+                case "h":
+                    inp = Level.High.ToString();
+                    break;
+                case "m":
+                    inp = Level.Medium.ToString();
+                    break;
+                case "l":
+                    inp = Level.Low.ToString();
+                    break;
+                default:
+                    Console.WriteLine();
+                    logger.Warn("Please enter \"h\", \"m\" or \"l\" only!");
+                    break;
+            }
+        }
+
+    // loop repeats until user enters "h", "m", "l", or "" (User pressed enter)
+    } while (inp != "High" 
+                && inp != "Medium" 
+                && inp != "Low" 
+                && inp != ""
+            )
+    ;
+
+    return inp;
+}
+
+
 
 // checks if user hit enter to cancel
 bool isCanceled(string input) {
@@ -171,7 +224,7 @@ bool isCanceled(string input) {
 
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
-void addTicket() {
+bool addTicket() {
     string inp;
 
     // loop determines which type of ticket to add, using user input with validation
@@ -192,9 +245,6 @@ void addTicket() {
 
             // if input is one of the three options, output it using logger
             if(inp == "1" || inp == "2" || inp == "3") {
-
-                // log user's input
-                logger.Info($"Input: \"{inp}\"\n");
 
                 string sel;
                 switch(inp) {
@@ -226,7 +276,7 @@ void addTicket() {
 
     // checks if user hit enter to cancel
     if(isCanceled(inp)) {
-        return;
+        return false;
     }
     
     // gets summary for ticket
@@ -234,18 +284,19 @@ void addTicket() {
 
     // checks if user hit enter to cancel
     if(isCanceled(smr)) {
-        return;
+        return false;
     } else {
         // if user DID NOT hit enter, log added summary
         Console.WriteLine();
         logger.Info($"Added summary: \"{smr}\"");
     }
 
+    // gets status for ticket
     string sts = getStatus();
 
     // checks if user hit enter to cancel
     if(isCanceled(sts)) {
-        return;
+        return false;
     } else {
 
         // if user DID NOT hit enter, log added status
@@ -253,17 +304,19 @@ void addTicket() {
         logger.Info($"Added status: {sts}");
     }
 
-    // string pri = getPriority();
+    string pri = getPriority();
 
-    // // checks if user hit enter to cancel
-    // if(isCanceled(pri)) {
-    //     return;
-    // } else {
+    // checks if user hit enter to cancel
+    if(isCanceled(pri)) {
+        return false;
+    } else {
 
-    //     // if user DID NOT hit enter, log added status
-    //     Console.WriteLine();
-    //     logger.Info($"Added priority: {pri}");
-    // }
+        // if user DID NOT hit enter, log added status
+        Console.WriteLine();
+        logger.Info($"Added priority: {pri}");
+    }
+
+    // string sbm = getSubmitter();
 
     switch(inp) {
         case "1":
@@ -274,4 +327,6 @@ void addTicket() {
         default:
             break;
     }
+
+    return true;
 }
