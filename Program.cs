@@ -210,6 +210,35 @@ Level getPriority() {
     return lev;
 }
 
+List<string> getWatching() {
+    string inp = null;
+
+    List<string> wat = new List<string>();
+
+    // same as the do-while loop, except it keeps track of the index (so I can number the watcher for the user)
+    for (int i = 1; inp != "done" && inp != ""; i++) {
+        inp = getInput($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket? (#{i})\n\nEnter to cancel\n\nType \"done\" to finish\n\n> ");
+
+        // if input is NOT empty (user did NOT hit enter) OR "done"
+        if(inp != "" && inp != "done") {
+
+            // add input to the list of watchers
+            wat.Add(inp);
+
+            // log added watcher
+            Console.WriteLine();
+            logger.Info($"Added \"{inp}\" to watching");
+
+        } else if(inp == "") {
+
+            // if input IS empty (user hit enter), empty the list of watchers and return that
+            wat = new List<string>();
+        }
+    }
+
+    return wat;
+}
+
 // checks if user hit enter to cancel
 bool isCanceled(string input) {
     if(input == "" || input == "None"){
@@ -289,7 +318,7 @@ bool addTicket() {
     } else {
         // if user DID NOT hit enter, log added summary
         Console.WriteLine();
-        logger.Info($"Added summary: \"{smr}\"");
+        logger.Info($"Added summary to ticket: \"{smr}\"");
     }
 
     // gets status for ticket
@@ -302,7 +331,7 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log added status
         Console.WriteLine();
-        logger.Info($"Added status: \"{sts}\"");
+        logger.Info($"Added status to ticket: \"{sts}\"");
     }
 
     // gets priority level for ticket
@@ -315,7 +344,7 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log added priority
         Console.WriteLine();
-        logger.Info($"Added priority: \"{pri}\"");
+        logger.Info($"Added priority level to ticket: \"{pri}\"");
     }
 
     // gets submitter for ticket
@@ -328,7 +357,7 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log added submitter
         Console.WriteLine();
-        logger.Info($"Added submitter: \"{sbm}\"");
+        logger.Info($"Added submitter to ticket: \"{sbm}\"");
     }
 
     // gets assigned for ticket
@@ -341,8 +370,25 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log assigned
         Console.WriteLine();
-        logger.Info($"Added assigned: \"{assi}\"");
+        logger.Info($"\"{assi}\" assigned to ticket");
     }
+
+    // gets watching for ticket
+    List<string> watc = getWatching();
+
+    // checks if user hit enter to cancel (empty)
+    if(watc.Count == 0) {
+        Console.WriteLine();
+        logger.Warn("Cancelling...");
+
+        return false;
+    } else {
+
+        // if user DID NOT hit enter, log assigned
+        Console.WriteLine();
+        logger.Info($"Added {watc.Count} watchers to ticket");
+    }
+
     switch(inp) {
         case "1":
             // addBugTicket();
