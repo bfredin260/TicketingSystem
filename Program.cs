@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Net;
-using System.Runtime.CompilerServices;
-using NLog;
+﻿using NLog;
 
 // See https://aka.ms/new-console-template for more information
 string path = Directory.GetCurrentDirectory() + "//nlog.config";
@@ -51,6 +48,10 @@ do{
     }
 
 } while(choice != "");
+
+
+
+// ==================== FUNCTIONS ====================
 
 // prompts user and then returns their response (unverified)
 string getInput(string prompt) {
@@ -152,6 +153,8 @@ string getStatus() {
 
     return inp;
 }
+
+// get user's input for priority field while adding a ticket
 
 // checks if user hit enter to cancel
 bool isCanceled(string input) {
