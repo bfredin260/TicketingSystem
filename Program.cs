@@ -125,7 +125,7 @@ string getChoice() {
 }
 
 
-// ----- Add Ticket Choice -----
+// ----- "Add Ticket" Choice -----
 
 // get user's input for status field while adding a ticket
 string getStatus() {
@@ -174,6 +174,7 @@ Level getPriority() {
     do {
         inp = getInput("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
+        // if input is NOT empty:
         if (inp != "") {
 
             // shorten string to one character
@@ -301,9 +302,10 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log added status
         Console.WriteLine();
-        logger.Info($"Added status: {sts}");
+        logger.Info($"Added status: \"{sts}\"");
     }
 
+    // gets priority level for ticket
     Level pri = getPriority();
 
     // checks if user hit enter to cancel
@@ -313,22 +315,34 @@ bool addTicket() {
 
         // if user DID NOT hit enter, log added priority
         Console.WriteLine();
-        logger.Info($"Added priority: {pri}");
+        logger.Info($"Added priority: \"{pri}\"");
     }
 
+    // gets submitter for ticket
     string sbm = getInput("\n\n ADD TICKET:\n-------------\n\n-Who submitted this ticket?\n\nEnter to cancel\n\n> ");
 
+    // checks if user hit enter to cancel
     if(isCanceled(sbm)) {
         return false;
     } else {
 
         // if user DID NOT hit enter, log added submitter
         Console.WriteLine();
-        logger.Info($"Added priority: {sbm}");
+        logger.Info($"Added submitter: \"{sbm}\"");
     }
 
+    // gets assigned for ticket
+    string assi = getInput("\n\n ADD TICKET:\n-------------\n\n-Who is assigned to this ticket?\n\nEnter to cancel\n\n> ");
 
+    // checks if user hit enter to cancel
+    if(isCanceled(assi)) {
+        return false;
+    } else {
 
+        // if user DID NOT hit enter, log assigned
+        Console.WriteLine();
+        logger.Info($"Added assigned: \"{assi}\"");
+    }
     switch(inp) {
         case "1":
             // addBugTicket();
