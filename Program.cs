@@ -311,12 +311,23 @@ bool addTicket() {
         return false;
     } else {
 
-        // if user DID NOT hit enter, log added status
+        // if user DID NOT hit enter, log added priority
         Console.WriteLine();
         logger.Info($"Added priority: {pri}");
     }
 
-    // string sbm = getSubmitter();
+    string sbm = getInput("\n\n ADD TICKET:\n-------------\n\n-Who submitted this ticket?\n\nEnter to cancel\n\n> ");
+
+    if(isCanceled(sbm)) {
+        return false;
+    } else {
+
+        // if user DID NOT hit enter, log added submitter
+        Console.WriteLine();
+        logger.Info($"Added priority: {sbm}");
+    }
+
+    
 
     switch(inp) {
         case "1":
