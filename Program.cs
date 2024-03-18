@@ -1,19 +1,23 @@
 ﻿using NLog;
 
-// See https://aka.ms/new-console-template for more information
-string path = Directory.GetCurrentDirectory() + "//nlog.config";
+// ==================== VARIABLES ==================== //
 
 // create instance of Logger
-Logger logger = LogManager.Setup().LoadConfigurationFromFile(path).GetCurrentClassLogger();
+Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
-string choice;
+// TicketFile objects
+TicketFile bugTicketFile = new TicketFile(), 
+           enhancementTicketFile = new TicketFile(), 
+           taskTicketFile = new TicketFile()
+;
 
-List<Ticket> tickets = new List<Ticket>();
+
 
 // ==================== MAIN PROGRAM FUNCTIONALITY ==================== //
 
 Console.WriteLine("\n   TICKETING SYSTEM\n----------------------");
 
+string choice;
 // loop determines user's choice ("1", "2", "3", "4", or "" to exit the program)
 do{
     choice = getChoice();
@@ -167,12 +171,12 @@ string getStatus() {
 }
 
 // get user's input for priority field while adding a ticket
-Level getPriority() {
+Level getLevel(string prompt) {
     string inp;
     Level lev = Level.None;
 
     do {
-        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
+        inp = getInput(prompt);
 
         // if input is NOT empty:
         if (inp != "") {
@@ -210,6 +214,7 @@ Level getPriority() {
     return lev;
 }
 
+// get user's input(s) for wathing field while adding a ticket
 List<string> getWatching() {
     string inp = null;
 
@@ -335,7 +340,7 @@ bool addTicket() {
     }
 
     // gets priority level for ticket
-    Level pri = getPriority();
+    Level pri = getLevel("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
     if(isCanceled(pri.ToString())) {
@@ -389,13 +394,54 @@ bool addTicket() {
         logger.Info($"Added {watc.Count} watchers to ticket");
     }
 
+    // use original input ("1", "2" or "3") to decide if the user is creating a Bug ticket, an Enhancement ticket or a Task ticket
     switch(inp) {
+
+        // bug ticket
         case "1":
-            // addBugTicket();
+
+            // gets severity for bug ticket
+            Level sev = getLevel("\n\n ADD TICKET:\n-------------\n\n-How severe is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
+            
+            // create new bug ticket with the given inputs
+            BugTicket tkt = new BugTicket() {
+                Summary = smr,
+                Status = sts,
+                Priority = pri,
+                Submitter = sbm,
+                Assigned = assi,
+                Watching = watc,
+
+                // even if user entered "", severity = Level.None
+                Severity = sev
+            };
+
+            // Severity == Level.None means that the user canceled while entering the severity
+            // if the ticket was cancelled
+            if(tkt.Severity == Level.None) {
+                return false;
+
+            // if the ticket was NOT cancelled:
+            } else {
+
+                //log added severity
+                Console.WriteLine();
+                logger.Info($"Added severity level to ticket: \"{sev}\"");
+            }
+
+            bugTicketFile.AddTicket(tkt);
+
             break;
+
+        // enhancement ticket
         case "2":
+            // EnhancementTicket tkt = addEnhancementTicket(smr, sts, pri, sbm, assi, watc);
             break;
+
+        // only other option is a task ticket (inp =/= "" here)
         default:
+            // TaskTicket tkt = addTaskTicket(smr, sts, pri, sbm, assi, watc);
+
             break;
     }
 

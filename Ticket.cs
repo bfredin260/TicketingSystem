@@ -9,10 +9,16 @@ public abstract class Ticket {
     public Ticket() {
         Watching = new List<string>();
     }
+
+    public abstract string FileFormat();
 }
 
 public class BugTicket : Ticket {
-    public string Severity { get; set; }
+    public Level Severity { get; set; }
+
+    public override string FileFormat() {
+        return $"";
+    }
 }
 
 public class EnhancementTicket : Ticket {
@@ -20,9 +26,19 @@ public class EnhancementTicket : Ticket {
     public double Cost { get; set; }
     public string Reason { get; set; }
     public string Estimate { get; set; }
+
+    public override string FileFormat()
+    {
+        return $"";
+    }
 }
 
 public class TaskTicket : Ticket {
     public string ProjectName { get; set; }
     public DateOnly DueDate { get; set; }
+
+    public override string FileFormat()
+    {
+        return $"";
+    }
 }
