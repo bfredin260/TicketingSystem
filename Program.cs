@@ -215,29 +215,37 @@ Level getLevel(string prompt) {
 }
 
 // get user's input(s) for a string list field while adding a ticket
-List<string> getStringList(string prompt) {
+List<string> getStringList(string prompt, string field, bool isNoneValid) {
     string inp = null;
 
     List<string> wat = new List<string>();
 
     // same as the do-while loop, except it keeps track of the index (so I can number the watchers for the user)
-    for (int i = 1; inp != "done" && inp != ""; i++) {
+    
+    /* inp != "done" && inp != "" && ((isNoneValid && inp.ToLower() !="none")
+    / ^ that condition checks if:
+            the input is not "done", 
+            AND the input is not "", 
+            AND, either the bool is true and input is NOT "none",
+                OR the bool is false */
+
+    for (int i = 1; inp != "done" && inp != "" && ((isNoneValid && inp.ToLower() !="none") || !isNoneValid); i++) {
         
         Console.Write(prompt);
         inp = getInput($" (#{i})\n\nEnter to cancel\n\nType \"done\" to finish\n\n> ");
 
-        // if input is NOT empty (user did NOT hit enter) OR "done"
-        if(inp != "done") {
+        // if input is NOT "done"
+        if(inp.ToLower() != "done") {
 
             // add input to the list of watchers
             wat.Add(inp);
 
-            // if the user did NOT cancel
-            if(inp != "") {
+            // if the user did NOT cancel AND the input is NOT "none
+            if(inp != "" && inp.ToLower() != "none") {
 
                 // log added watcher
                 Console.WriteLine();
-                logger.Info($"Added \"{inp}\" to watching");
+                logger.Info($"Added \"{inp}\" to {field}");
             }
         }
     }
@@ -272,10 +280,7 @@ bool newTicket() {
 
             // convert input to lowercase, then first character only, then back to string
             // ("Tree" becomes "t")
-            inp = inp.ToLower()
-                        .ToCharArray()[0]
-                        .ToString()
-            ;
+            shorten(inp);
 
             Console.WriteLine();
 
@@ -380,7 +385,7 @@ bool newTicket() {
     }
 
     // gets watching for ticket
-    List<string> watc = getStringList($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket?");
+    List<string> watc = getStringList($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket?", "Watching", false);
 
     // checks if user hit enter to cancel
     if(watc[0] == "") {
@@ -438,11 +443,17 @@ bool newTicket() {
         case "2":
 
             // gets software requirements for ticket
-            List<string> sftw = getStringList(" ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket");
+            List<string> sftw = getStringList(" ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket", "Software", true);
 
-            if(sftw[0] == null) {
+            // checks if user hit enter to cancel
+            if(watc[0] == "") {
+                Console.WriteLine();
+                logger.Warn("Cancelling...");
+
+                return false;
 
             }
+
             break;
 
         // only other option is a task ticket (inp =/= "" here)
