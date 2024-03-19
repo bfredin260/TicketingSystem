@@ -52,7 +52,7 @@ do{
             break;
     }
 
-} while(choice != "");
+} while (choice != "");
 
 
 
@@ -216,26 +216,41 @@ Level getLevel(string prompt) {
 
 // get user's input(s) for a string list field while adding a ticket
 List<string> getStringList(string prompt, string field, bool isNoneValid) {
-    string inp = null;
+    string inp = " ";
 
     List<string> wat = new List<string>();
 
     // same as the do-while loop, except it keeps track of the index (so I can number the watchers for the user)
     
-    /* inp != "done" && inp != "" && ((isNoneValid && inp.ToLower() !="none")
-    / ^ that condition checks if:
-            the input is not "done", 
-            AND the input is not "", 
-            AND, either the bool is true and input is NOT "none",
-                OR the bool is false */
+    /* (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none"))
+            ^ that condition checks if:
+                the input is not "done" 
+                    OR it is the second input (the user cannot type "done" on the first input),
 
-    for (int i = 1; inp != "done" && inp != "" && ((isNoneValid && inp.ToLower() !="none") || !isNoneValid); i++) {
+                AND the input is not "" (the user did not hit enter), 
+                AND, either the bool is false (if the bool is false, they can't enter "none")
+                    AND the input is not "none", 
+                    AND it is the first input,
+                    OR the bool is true (the bool just says if the user can enter "none" to create an empty List) */
+    for (int i = 1; (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none")); i++) {
         
         Console.Write(prompt);
-        inp = getInput($" (#{i})\n\nEnter to cancel\n\nType \"done\" to finish\n\n> ");
+        Console.Write($" (#{i})\n\nEnter to cancel");
 
-        // if input is NOT "done"
-        if(inp.ToLower() != "done") {
+        if(i > 1) {
+            Console.Write("\n\nType \"done\" to finish");
+        }
+
+        // if the isNoneValid is true, it means the user can type "none" to quit out of this input without canceling
+        // should only let the user do this on the first input
+        if(isNoneValid && i == 1)
+            Console.Write($"\n\nType \"none\" if there are no values for {field}");
+
+
+        inp = getInput("\n\n> ");
+
+        // if input is NOT "done" OR it is the first input
+        if(inp.ToLower() != "done" || i == 1) {
 
             // add input to the list of watchers
             wat.Add(inp);
@@ -253,9 +268,62 @@ List<string> getStringList(string prompt, string field, bool isNoneValid) {
     return wat;
 }
 
+double getCost() {
+    string inp;
+    double cost = double.NaN;
+
+    do {
+        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Enter a cost estimate for this enhancement (in dollars)\n\nEnter to cancel\n\n> $");
+
+        // if the input is NOT empty
+        if(inp != "") {
+
+            // then check if the input can NOT be parsed into a double
+            if(!Double.TryParse(inp, out cost)) {
+                Console.WriteLine();
+                logger.Warn("Please enter a valid input!");
+
+                // if parse fails, set cost to NaN so that the loop runs again
+                cost = double.NaN;
+            }
+        }
+    
+    // loop will repeat until the input is "" (user hit enter), OR the user inputted a valid cost
+    } while (inp != "" 
+                && !double.IsNormal(cost)
+            )
+    ;
+
+    return cost;
+}
+
 // checks if user hit enter to cancel
-bool isCanceled(string input) {
-    if(input == "" || input == "None"){
+bool isStringCanceled(string input) {
+    if(input == ""){
+        Console.WriteLine();
+        logger.Warn("Cancelling...");
+
+        // returns out of the function if user hit enter.
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool isStringListCanceled(List<string> input) {
+    if(input[0] == "") {
+        Console.WriteLine();
+        logger.Warn("Cancelling...");
+
+        // returns out of the function if user hit enter.
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool isDoubleCanceled(double input) {
+    if (double.IsNaN(input)) {
         Console.WriteLine();
         logger.Warn("Cancelling...");
 
@@ -316,7 +384,7 @@ bool newTicket() {
     ;
 
     // checks if user hit enter to cancel
-    if(isCanceled(inp)) {
+    if(isStringCanceled(inp)) {
         return false;
     }
     
@@ -324,7 +392,7 @@ bool newTicket() {
     string smr = getInput("\n\n ADD TICKET:\n-------------\n\n-Please Enter Ticket Summary:\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
-    if(isCanceled(smr)) {
+    if(isStringCanceled(smr)) {
         return false;
     } else {
         // if user DID NOT hit enter, log added summary
@@ -336,7 +404,7 @@ bool newTicket() {
     string sts = getStatus();
 
     // checks if user hit enter to cancel
-    if(isCanceled(sts)) {
+    if(isStringCanceled(sts)) {
         return false;
     } else {
 
@@ -349,7 +417,7 @@ bool newTicket() {
     Level pri = getLevel("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
-    if(isCanceled(pri.ToString())) {
+    if(pri == Level.None) {
         return false;
     } else {
 
@@ -362,7 +430,7 @@ bool newTicket() {
     string sbm = getInput("\n\n ADD TICKET:\n-------------\n\n-Who submitted this ticket?\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
-    if(isCanceled(sbm)) {
+    if(isStringCanceled(sbm)) {
         return false;
     } else {
 
@@ -375,29 +443,26 @@ bool newTicket() {
     string assi = getInput("\n\n ADD TICKET:\n-------------\n\n-Who is assigned to this ticket?\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
-    if(isCanceled(assi)) {
+    if(isStringCanceled(assi)) {
         return false;
     } else {
 
         // if user DID NOT hit enter, log assigned
         Console.WriteLine();
-        logger.Info($"\"{assi}\" assigned to ticket");
+        logger.Info($"Assigned \"{assi}\" to ticket");
     }
 
     // gets watching for ticket
     List<string> watc = getStringList($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket?", "Watching", false);
 
     // checks if user hit enter to cancel
-    if(watc[0] == "") {
-        Console.WriteLine();
-        logger.Warn("Cancelling...");
-
+    if(isStringListCanceled(watc)) {
         return false;
     } else {
 
-        // if user DID NOT hit enter, log assigned
+        // if user DID NOT hit enter, log watchers
         Console.WriteLine();
-        logger.Info($"Added {watc.Count} watchers to ticket");
+        logger.Info($"Added {watc.Count} watcher(s) to ticket");
     }
 
     // use original input ("1", "2" or "3") to decide if the user is creating a Bug ticket, an Enhancement ticket or a Task ticket
@@ -408,23 +473,9 @@ bool newTicket() {
 
             // gets severity for bug ticket
             Level sev = getLevel("\n\n ADD TICKET:\n-------------\n\n-How severe is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
-            
-            // create new bug ticket with the given inputs
-            BugTicket tkt = new BugTicket() {
-                Summary = smr,
-                Status = sts,
-                Priority = pri,
-                Submitter = sbm,
-                Assigned = assi,
-                Watching = watc,
 
-                // even if user entered "", severity = Level.None
-                Severity = sev
-            };
-
-            // Severity == Level.None means that the user canceled while entering the severity
-            // if the ticket was cancelled
-            if(tkt.Severity == Level.None) {
+            // checks if user hit enter to cancel
+            if(sev == Level.None) {
                 return false;
 
             // if the ticket was NOT cancelled:
@@ -435,7 +486,18 @@ bool newTicket() {
                 logger.Info($"Added severity level to ticket: \"{sev}\"");
             }
 
-            bugTicketFile.AddTicket(tkt);
+            // create new bug ticket with the given inputs
+            BugTicket tkt = new BugTicket() {
+                Summary = smr,
+                Status = sts,
+                Priority = pri,
+                Submitter = sbm,
+                Assigned = assi,
+                Watching = watc,
+                Severity = sev
+            };
+
+            bugTicketFile.AddToList(tkt);
 
             break;
 
@@ -443,15 +505,30 @@ bool newTicket() {
         case "2":
 
             // gets software requirements for ticket
-            List<string> sftw = getStringList(" ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket", "Software", true);
+            List<string> sftw = getStringList("\n\n ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket", "Software", true);
+
+            Console.WriteLine();
 
             // checks if user hit enter to cancel
-            if(watc[0] == "") {
-                Console.WriteLine();
-                logger.Warn("Cancelling...");
-
+            if(isStringListCanceled(sftw)) {
                 return false;
+            } else if(sftw[0] != "none"){
+                // if user DID NOT hit enter AND they didn't input "none", log software
+                logger.Info($"Added {sftw.Count} software requirements to ticket");
+            } else {
+                // if user DID input "none"
+                logger.Info("No software requirements were added to ticket");
+            }
 
+            double cst = getCost();
+
+            if(isDoubleCanceled(cst)) {
+                return false;
+            } else {
+                
+                // if user DID NOT hit enter, log cost
+                Console.WriteLine();
+                logger.Info($"Added cost to ticket: \"{cst:#0.00}\"");
             }
 
             break;
