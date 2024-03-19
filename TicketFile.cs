@@ -2,7 +2,7 @@ using NLog;
 
 public class TicketFile {
     public string FilePath { get; set; }
-    public List<Ticket> Tickets { get; set; }
+    public List<Ticket> Tickets = new List<Ticket>();
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
     
     // adds the ticket to the object's Ticket field (there will be one object for each Ticket type)

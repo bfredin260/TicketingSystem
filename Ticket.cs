@@ -25,7 +25,7 @@ public class EnhancementTicket : Ticket {
     public List<string> Software { get; set; }
     public double Cost { get; set; }
     public string Reason { get; set; }
-    public string Estimate { get; set; }
+    public TimeSpan Estimate { get; set; }
 
     public override string FileFormat()
     {

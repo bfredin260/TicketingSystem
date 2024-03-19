@@ -6,6 +6,7 @@
     <RootNamespace>Ticketing_System</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <GenerateResourceNeverLockTypeAssemblies>true</GenerateResourceNeverLockTypeAssemblies>
   </PropertyGroup>
 
   <ItemGroup>

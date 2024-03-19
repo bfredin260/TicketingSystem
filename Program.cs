@@ -6,9 +6,9 @@
 Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
 // TicketFile objects
-TicketFile bugTicketFile = new TicketFile(), 
-           enhancementTicketFile = new TicketFile(), 
-           taskTicketFile = new TicketFile()
+TicketFile bugTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}, 
+           enhancementTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}, 
+           taskTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}
 ;
 
 
@@ -27,7 +27,7 @@ do{
 
         // add ticket for "1"
         case "1":
-            addTicket();
+            newTicket();
             break;
 
         // view tickets for "2"
@@ -170,7 +170,7 @@ string getStatus() {
     return inp;
 }
 
-// get user's input for priority field while adding a ticket
+// get user's input for a level field while adding a ticket
 Level getLevel(string prompt) {
     string inp;
     Level lev = Level.None;
@@ -214,30 +214,31 @@ Level getLevel(string prompt) {
     return lev;
 }
 
-// get user's input(s) for wathing field while adding a ticket
-List<string> getWatching() {
+// get user's input(s) for a string list field while adding a ticket
+List<string> getStringList(string prompt) {
     string inp = null;
 
     List<string> wat = new List<string>();
 
-    // same as the do-while loop, except it keeps track of the index (so I can number the watcher for the user)
+    // same as the do-while loop, except it keeps track of the index (so I can number the watchers for the user)
     for (int i = 1; inp != "done" && inp != ""; i++) {
-        inp = getInput($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket? (#{i})\n\nEnter to cancel\n\nType \"done\" to finish\n\n> ");
+        
+        Console.Write(prompt);
+        inp = getInput($" (#{i})\n\nEnter to cancel\n\nType \"done\" to finish\n\n> ");
 
         // if input is NOT empty (user did NOT hit enter) OR "done"
-        if(inp != "" && inp != "done") {
+        if(inp != "done") {
 
             // add input to the list of watchers
             wat.Add(inp);
 
-            // log added watcher
-            Console.WriteLine();
-            logger.Info($"Added \"{inp}\" to watching");
+            // if the user did NOT cancel
+            if(inp != "") {
 
-        } else if(inp == "") {
-
-            // if input IS empty (user hit enter), empty the list of watchers and return that
-            wat = new List<string>();
+                // log added watcher
+                Console.WriteLine();
+                logger.Info($"Added \"{inp}\" to watching");
+            }
         }
     }
 
@@ -259,7 +260,7 @@ bool isCanceled(string input) {
 
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
-bool addTicket() {
+bool newTicket() {
     string inp;
 
     // loop determines which type of ticket to add, using user input with validation
@@ -379,10 +380,10 @@ bool addTicket() {
     }
 
     // gets watching for ticket
-    List<string> watc = getWatching();
+    List<string> watc = getStringList($"\n\n ADD TICKET:\n-------------\n\n-Who is watching this ticket?");
 
-    // checks if user hit enter to cancel (empty)
-    if(watc.Count == 0) {
+    // checks if user hit enter to cancel
+    if(watc[0] == "") {
         Console.WriteLine();
         logger.Warn("Cancelling...");
 
@@ -435,12 +436,18 @@ bool addTicket() {
 
         // enhancement ticket
         case "2":
-            // EnhancementTicket tkt = addEnhancementTicket(smr, sts, pri, sbm, assi, watc);
+
+            // gets software requirements for ticket
+            List<string> sftw = getStringList(" ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket");
+
+            if(sftw[0] == null) {
+
+            }
             break;
 
         // only other option is a task ticket (inp =/= "" here)
         default:
-            // TaskTicket tkt = addTaskTicket(smr, sts, pri, sbm, assi, watc);
+            // TODO: ADD FUNCTIONALITY
 
             break;
     }
