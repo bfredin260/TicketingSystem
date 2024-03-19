@@ -6,9 +6,9 @@
 Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
 // TicketFile objects
-TicketFile bugTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}, 
-           enhancementTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}, 
-           taskTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"}
+TicketFile bugTicketFile = new TicketFile(), 
+           enhancementTicketFile = new TicketFile(), 
+           taskTicketFile = new TicketFile()
 ;
 
 
@@ -18,6 +18,7 @@ TicketFile bugTicketFile = new TicketFile() {FilePath = "bugTicketTemp.csv"},
 Console.WriteLine("\n   TICKETING SYSTEM\n----------------------");
 
 string choice;
+
 // loop determines user's choice ("1", "2", "3", "4", or "" to exit the program)
 do{
     choice = getChoice();
@@ -47,8 +48,7 @@ do{
 
         // exit loop when user chooses "" (press enter)
         case "":
-            Console.WriteLine();
-            logger.Info("Closing program...");
+            info("Closing program...");
             break;
     }
 
@@ -78,6 +78,27 @@ string shorten(string input) {
     ;
 }
 
+
+// -- just to shorten code a little bit --
+
+// just a long line to divide each prompt
+void line() {
+    Console.WriteLine("=========================================================================\n\n");
+}
+
+// line + logger.Info()
+void info(string msg) {
+    line();
+    logger.Info(msg);
+}
+
+// line +logger.Warn()
+void warn(string msg) {
+    line();
+    logger.Warn(msg);
+}
+
+
 // gets user's choice (used only for selecting 1-4 to add ticket, view tickets, load and save tickets)
 string getChoice() {
     string inp;
@@ -90,8 +111,6 @@ string getChoice() {
 
             // shorten string to one character
             inp = shorten(inp);
-
-            Console.WriteLine();
 
             // if user chose one of the four options, output it using logger
             if(inp == "1" || inp == "2" || inp == "3" || inp == "4") {
@@ -110,11 +129,11 @@ string getChoice() {
                         sel = "Save Ticket(s) to File";
                         break;
                 }
-                logger.Info($"Selected: \"{sel}\"");
+                info($"Selected: \"{sel}\"");
             } else {
 
                 // if not, warn user and repeat the loop
-                logger.Warn("Please enter a valid option!");
+                warn("Please enter a valid option!");
             }
         }
     // loop repeats until the user inputs a valid choice
@@ -154,8 +173,7 @@ string getStatus() {
                     inp = "Closed";
                     break;
                 default:
-                    Console.WriteLine();
-                    logger.Warn("Please enter \"y\" or \"n\" only!");
+                    warn("Please enter \"y\" or \"n\" only!");
                     break;
             }
         }
@@ -197,8 +215,7 @@ Level getLevel(string prompt) {
                     lev = Level.Low;
                     break;
                 default:
-                    Console.WriteLine();
-                    logger.Warn("Please enter \"h\", \"m\" or \"l\" only!");
+                    warn("Please enter \"h\", \"m\" or \"l\" only!");
                     break; 
             }
         }
@@ -222,20 +239,9 @@ List<string> getStringList(string prompt, string field, bool isNoneValid) {
 
     // same as the do-while loop, except it keeps track of the index (so I can number the watchers for the user)
     
-    /* (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none"))
-            ^ that condition checks if:
-                the input is not "done" 
-                    OR it is the second input (the user cannot type "done" on the first input),
-
-                AND the input is not "" (the user did not hit enter), 
-                AND, either the bool is false (if the bool is false, they can't enter "none")
-                    AND the input is not "none", 
-                    AND it is the first input,
-                    OR the bool is true (the bool just says if the user can enter "none" to create an empty List) */
-    for (int i = 1; (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none")); i++) {
-        
-        Console.Write(prompt);
-        Console.Write($" (#{i})\n\nEnter to cancel");
+    // for (int i = 1; (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none")); i++) {
+    for (int i = 1; !(inp.ToLower() == "done" && i > 2 || (inp.ToLower() == "none" && isNoneValid && i == 2) || inp == ""); i++) {
+        Console.Write($"{prompt} (#{i})\n\nEnter to cancel");
 
         if(i > 1) {
             Console.Write("\n\nType \"done\" to finish");
@@ -250,58 +256,158 @@ List<string> getStringList(string prompt, string field, bool isNoneValid) {
         inp = getInput("\n\n> ");
 
         // if input is NOT "done" OR it is the first input
-        if(inp.ToLower() != "done" || i == 1) {
+        if(i == 1 || inp.ToLower() != "done") {
 
             // add input to the list of watchers
             wat.Add(inp);
+        }
 
-            // if the user did NOT cancel AND the input is NOT "none
-            if(inp != "" && inp.ToLower() != "none") {
+        // if the input is valid to be prompted
+        if(!((i == 1 && inp == "none" && isNoneValid) || (inp == "done" && i > 1) || inp == "")) {
 
-                // log added watcher
-                Console.WriteLine();
-                logger.Info($"Added \"{inp}\" to {field}");
-            }
+            // log added watcher
+            info($"Added \"{inp}\" to {field}");
         }
     }
 
     return wat;
 }
 
+// get user's input for a cost field while adding a ticket
 double getCost() {
     string inp;
     double cost = double.NaN;
 
     do {
-        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Enter a cost estimate for this enhancement (in dollars)\n\nEnter to cancel\n\n> $");
+        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Enter a cost estimate for this enhancement (in dollars and cents)\n\nEnter to cancel\n\n> $");
 
         // if the input is NOT empty
         if(inp != "") {
 
             // then check if the input can NOT be parsed into a double
             if(!Double.TryParse(inp, out cost)) {
-                Console.WriteLine();
-                logger.Warn("Please enter a valid input!");
+                warn("Please enter a valid input!");
 
                 // if parse fails, set cost to NaN so that the loop runs again
                 cost = double.NaN;
+            
+            // if parse DID NOT fail,
+            } else {
+
+                // then check if the value is negative to warn the user
+                if(cost < 0) {
+                    warn("Please enter a positive value!");
+
+                }
             }
         }
     
     // loop will repeat until the input is "" (user hit enter), OR the user inputted a valid cost
     } while (inp != "" 
-                && !double.IsNormal(cost)
+                && !(cost >= 0)
             )
     ;
 
     return cost;
 }
 
+// get user's input for an estimate field while adding a ticket
+TimeSpan getEstimatedTimeSpan() {
+    string inp;
+    int val = -1;
+
+    int years = 0;
+    int months = 0;
+    int days = 0;
+
+    // this needs to loop 3 times (one for years, one for months, one for days)
+    for(int i = 0; i < 3; i++) {
+
+        // string that holds "years", "months", or "years" for user's prompt
+        string ymd;
+        switch (i) {
+            case 0:
+                ymd = "Years";
+                break;
+            
+            case 1:
+                ymd = "Months";
+                break;
+            
+            default:
+                ymd = "Days";
+                break;
+        }
+
+        // loop that gets user's input for TimeSpan values
+        do {
+            inp = getInput($"\n\nADD TICKET:\n-------------\n\n-Enter estimated time span to complete this ticket ({ymd}):\n\nEnter to cancel\n\n> ");
+
+            if(inp != "") {
+            
+                // if input parse is SUCCESSFUL
+                // sets val to the parsed int value
+                if(int.TryParse(inp, out val)) {
+
+                    // check if input is NOT a valid value
+                    if(!((val >= 0 && ymd != "Days") || (val > 0 && ymd == "Days" && years == 0 && months == 0) || (val >= 0 && ymd == "Days" && !(years == 0 && months == 0)))) {
+                    
+                        // warns the user of their mistake using the correct values
+                        if(ymd == "Days" && val == 0 && years == 0 && months == 0) {
+                            warn($"{ymd} input must be more than 0!");
+
+                        } else {
+                            warn($"{ymd} input must be positive!");
+
+                        }
+                    }
+                
+                // if the parse fails
+                } else {
+                    warn("Please enter a whole number!");
+
+                    // set val to -1 so that the loop repeats
+                    val = -1;
+                }
+
+            // if input is "" (user hit enter)
+            } else {
+
+                // return TimeSpan of 0 ticks
+                return new TimeSpan(0);
+            }
+
+        // loop repeats until the user inputs a valid value
+        } while (!((val >= 0 && ymd != "Days") || (val > 0 && ymd == "Days" && years == 0 && months == 0) || (val >= 0 && ymd == "Days" && !(years == 0 && months == 0))));
+
+        // sets the correct variable to the user's input
+        switch(i) {
+            case 0:
+                years = int.Parse(inp);
+                break;
+            case 1:
+                months = int.Parse(inp);
+                break;
+            default:
+                days = int.Parse(inp);
+                break;
+        }
+
+        info($"{ymd} updated: {val}");
+    }
+
+    return new TimeSpan((years * 365) + (months * 28) + days, 0, 0, 0);
+}
+
+
+// ----- Test for Canceled methods ----- //
+
 // checks if user hit enter to cancel
+
+// for strings
 bool isStringCanceled(string input) {
     if(input == ""){
-        Console.WriteLine();
-        logger.Warn("Cancelling...");
+        warn("Cancelling...");
 
         // returns out of the function if user hit enter.
         return true;
@@ -310,10 +416,10 @@ bool isStringCanceled(string input) {
     }
 }
 
+// for List<string>s
 bool isStringListCanceled(List<string> input) {
     if(input[0] == "") {
-        Console.WriteLine();
-        logger.Warn("Cancelling...");
+        warn("Cancelling...");
 
         // returns out of the function if user hit enter.
         return true;
@@ -322,10 +428,10 @@ bool isStringListCanceled(List<string> input) {
     }
 }
 
+// for doubles
 bool isDoubleCanceled(double input) {
     if (double.IsNaN(input)) {
-        Console.WriteLine();
-        logger.Warn("Cancelling...");
+        warn("Cancelling...");
 
         // returns out of the function if user hit enter.
         return true;
@@ -334,6 +440,29 @@ bool isDoubleCanceled(double input) {
     }
 }
 
+// for Levels
+bool isLevelCanceled(Level input) {
+    if(input == Level.None) {
+        warn("Cancelling...");
+
+        // returns out of the function if user hit enter.
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+bool isTimeSpanCanceled(TimeSpan input) {
+    if(input == new TimeSpan(0)) {
+        warn("Cancelling...");
+
+        // returns out of the function if user hit enter.
+        return true;
+    } else {
+        return false;
+    }
+}
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
 bool newTicket() {
@@ -348,9 +477,7 @@ bool newTicket() {
 
             // convert input to lowercase, then first character only, then back to string
             // ("Tree" becomes "t")
-            shorten(inp);
-
-            Console.WriteLine();
+            inp = shorten(inp);
 
             // if input is one of the three options, output it using logger
             if(inp == "1" || inp == "2" || inp == "3") {
@@ -367,11 +494,11 @@ bool newTicket() {
                         sel = "Task";
                         break;
                 }
-                logger.Info($"Selected: \"{sel}\"");
+                info($"Selected: \"{sel}\"");
             } else {
 
                 // if not, warn user and restart loop
-                logger.Warn("Please enter a valid option!");
+                warn("Please enter a valid option!");
             }
         }
     
@@ -395,9 +522,9 @@ bool newTicket() {
     if(isStringCanceled(smr)) {
         return false;
     } else {
+
         // if user DID NOT hit enter, log added summary
-        Console.WriteLine();
-        logger.Info($"Added summary to ticket: \"{smr}\"");
+        info($"Added summary to ticket: \"{smr}\"");
     }
 
     // gets status for ticket
@@ -409,21 +536,19 @@ bool newTicket() {
     } else {
 
         // if user DID NOT hit enter, log added status
-        Console.WriteLine();
-        logger.Info($"Added status to ticket: \"{sts}\"");
+        info($"Added status to ticket: \"{sts}\"");
     }
 
     // gets priority level for ticket
     Level pri = getLevel("\n\n ADD TICKET:\n-------------\n\n-What priority level is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
     // checks if user hit enter to cancel
-    if(pri == Level.None) {
+    if(isLevelCanceled(pri)) {
         return false;
     } else {
 
         // if user DID NOT hit enter, log added priority
-        Console.WriteLine();
-        logger.Info($"Added priority level to ticket: \"{pri}\"");
+        info($"Added priority level to ticket: \"{pri}\"");
     }
 
     // gets submitter for ticket
@@ -435,8 +560,7 @@ bool newTicket() {
     } else {
 
         // if user DID NOT hit enter, log added submitter
-        Console.WriteLine();
-        logger.Info($"Added submitter to ticket: \"{sbm}\"");
+        info($"Added submitter to ticket: \"{sbm}\"");
     }
 
     // gets assigned for ticket
@@ -448,8 +572,7 @@ bool newTicket() {
     } else {
 
         // if user DID NOT hit enter, log assigned
-        Console.WriteLine();
-        logger.Info($"Assigned \"{assi}\" to ticket");
+        info($"Assigned \"{assi}\" to ticket");
     }
 
     // gets watching for ticket
@@ -461,8 +584,7 @@ bool newTicket() {
     } else {
 
         // if user DID NOT hit enter, log watchers
-        Console.WriteLine();
-        logger.Info($"Added {watc.Count} watcher(s) to ticket");
+        info($"Added {watc.Count} watcher(s) to ticket");
     }
 
     // use original input ("1", "2" or "3") to decide if the user is creating a Bug ticket, an Enhancement ticket or a Task ticket
@@ -475,19 +597,18 @@ bool newTicket() {
             Level sev = getLevel("\n\n ADD TICKET:\n-------------\n\n-How severe is this ticket?\n\nh) High\nm) Medium\nl) Low (lowercase L)\n\nEnter to cancel\n\n> ");
 
             // checks if user hit enter to cancel
-            if(sev == Level.None) {
+            if(isLevelCanceled(sev)) {
                 return false;
 
             // if the ticket was NOT cancelled:
             } else {
 
                 //log added severity
-                Console.WriteLine();
-                logger.Info($"Added severity level to ticket: \"{sev}\"");
+                info($"Added severity level to ticket: \"{sev}\"");
             }
 
             // create new bug ticket with the given inputs
-            BugTicket tkt = new BugTicket() {
+            BugTicket bgTkt = new BugTicket() {
                 Summary = smr,
                 Status = sts,
                 Priority = pri,
@@ -497,39 +618,103 @@ bool newTicket() {
                 Severity = sev
             };
 
-            bugTicketFile.AddToList(tkt);
+            // add bug ticket to the list in the associated object
+            bugTicketFile.AddToList(bgTkt);
 
             break;
 
         // enhancement ticket
         case "2":
 
-            // gets software requirements for ticket
+            // gets software requirements field for enhancement ticket
             List<string> sftw = getStringList("\n\n ADD TICKET:\n-------------\n\n-Enter a software requirement for this ticket", "Software", true);
-
-            Console.WriteLine();
 
             // checks if user hit enter to cancel
             if(isStringListCanceled(sftw)) {
                 return false;
-            } else if(sftw[0] != "none"){
-                // if user DID NOT hit enter AND they didn't input "none", log software
-                logger.Info($"Added {sftw.Count} software requirements to ticket");
             } else {
-                // if user DID input "none"
-                logger.Info("No software requirements were added to ticket");
+                if(sftw[0] != "none"){
+
+                    // if user DID NOT hit enter AND they didn't input "none", log software
+                    info($"Added {sftw.Count} software requirements to ticket");
+                } else {
+
+                    // if user DID input "none"
+                    info("No software requirements were added to ticket");
+                }
             }
 
-            double cst = getCost();
+            // gets cost field for enhancement ticket
+            // uses string interpolation formatting to always get a number with two values after the decimal point
 
+            /* this does not stop the variable from trimming extra zeroes at the end of the number, 
+            but it DOES stop the variable from storing a double with more than two decimal places, which makes sense for cost */
+            double cst = Double.Parse($"{getCost():#0.00}"); 
+
+            // checks if user hit enter to cancel
             if(isDoubleCanceled(cst)) {
                 return false;
             } else {
                 
                 // if user DID NOT hit enter, log cost
-                Console.WriteLine();
-                logger.Info($"Added cost to ticket: \"{cst:#0.00}\"");
+                info($"Added cost to ticket: \"{cst:#0.00}\"");
             }
+
+            // gets reason field for enhancement ticket
+            string rsn = getInput("\n\nADD TICKET:\n-------------\n\n-What is the reason for this ticket?\n\nEnter to cancel\n\n> ");
+            
+            // checks if user hit enter to cancel
+            if(isStringCanceled(rsn)) {
+                return false;
+            } else {
+                
+                // if user DID NOT hit enter, log reason
+                info($"Added reason to ticket: \"{rsn}\"");
+            }
+
+            TimeSpan est = getEstimatedTimeSpan();
+
+            if(isTimeSpanCanceled(est)) {
+                return false;
+            } else {
+
+                // if user DID NOT hit enter, log TimeSpan estimate
+                Console.WriteLine(est);
+
+                // # of days in estimate TimeSpan
+                int estDys = int.Parse(est.ToString().Split(".").First());
+
+                // # of years is ( days - (days % 365) ) / 365
+                int estYrs = (estDys - estDys % 365) / 365;
+
+                // # of remaining days is days - (years * 365) [subtracts the amount of days in that many years]
+                estDys = estDys - (estYrs * 365);
+
+                // # of months is ( remaining days - (remaining days % 28) ) / 28
+                int estMts = (estDys - estDys % 28) / 28;
+
+                // # of remaining days is days - (months * 28) [subtracts the amount of days in that many months]
+                estDys = estDys - (estMts * 28);
+
+                logger.Info($"Added estimated time span to ticket: \"{estYrs} years, {estMts} months, {estDys} days.\"");
+            }
+
+            // create new enhancement ticket with the given inputs
+            EnhancementTicket enTkt = new EnhancementTicket() {
+                Summary = smr,
+                Status = sts,
+                Priority = pri,
+                Submitter = sbm,
+                Assigned = assi,
+                Watching = watc,
+                Software = sftw,
+                Cost = cst,
+                Reason = rsn,
+                Estimate = est
+            };
+
+            // add bug ticket to the list in the associated object
+            enhancementTicketFile.AddToList(enTkt);
 
             break;
 

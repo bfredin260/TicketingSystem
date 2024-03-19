@@ -1,7 +1,6 @@
 using NLog;
 
 public class TicketFile {
-    public string FilePath { get; set; }
     public List<Ticket> Tickets { get; set; }
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
     
@@ -10,7 +9,7 @@ public class TicketFile {
     }
 
     // adds the ticket to the object's Ticket field (there will be one object for each Ticket type)
-    public virtual void AddToList(Ticket ticket) {
+    public void AddToList(Ticket ticket) {
         Tickets.Add(ticket);
 
         string type;
@@ -25,6 +24,18 @@ public class TicketFile {
 
         Console.WriteLine();
         logger.Info($"{type} Ticket added! ");
+    }
+
+    public void AddToFile(Ticket ticket) {
+        // TODO: ADD FUNCTIONALITY
+    }
+
+    public void ReadFromFile(Ticket ticket) {
+        // TODO: ADD FUNCTIONALITY
+    }
+
+    public void SaveToFile(Ticket ticket) {
+        // TODO: ADD FUNCTIONALITY
     }
 
 }
