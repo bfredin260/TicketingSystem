@@ -9,15 +9,13 @@ public abstract class Ticket {
     public Ticket() {
         Watching = new List<string>();
     }
-
-    public abstract string FileLine();
 }
 
 public class BugTicket : Ticket {
     public Level Severity { get; set; }
 
-    public override string FileLine() {
-        return $"";
+    public override string ToString() {
+        return $"bug|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{Severity}";
     }
 }
 
@@ -29,9 +27,9 @@ public class EnhancementTicket : Ticket {
     // estimated amount of time in DAYS for the ticket to be completed
     public TimeSpan Estimate { get; set; }
 
-    public override string FileLine()
+    public override string ToString()
     {
-        return $"";
+        return $"enhancement|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{string.Join("~", Software)}|{Cost}|{Reason}|{Estimate.Days}";
     }
 }
 
@@ -39,8 +37,8 @@ public class TaskTicket : Ticket {
     public string ProjectName { get; set; }
     public DateTime DueDate { get; set; }
 
-    public override string FileLine()
+    public override string ToString()
     {
-        return $"";
+        return $"bug|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{ProjectName}|{DueDate}";
     }
 }
