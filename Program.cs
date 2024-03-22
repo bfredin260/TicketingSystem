@@ -7,10 +7,9 @@ using NLog;
 Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
 // TicketFile objects
-TicketFile bugTicketFile = new TicketFile(), 
-           enhancementTicketFile = new TicketFile(), 
-           taskTicketFile = new TicketFile()
-;
+BugTicketFile bugTicketFile = new BugTicketFile();
+EnhancementTicketFile enhancementTicketFile = new EnhancementTicketFile();
+TaskTicketFile taskTicketFile = new TaskTicketFile();
 
 // creates/clears temp file to be used each time the program runs
 File.WriteAllText("TempTickets.csv", "");
@@ -914,10 +913,9 @@ void newTicket() {
 
             if(isTimeSpanCanceled(est)) {
                 return;
-            } else {
 
-                // if user DID NOT hit enter, log TimeSpan estimate
-                Console.WriteLine(est);
+            // if user did NOT hit enter, log timespan estimate
+            } else {
 
                 // # of days in estimate TimeSpan
                 int estDys = int.Parse(est.ToString().Split(".").First());
@@ -1007,6 +1005,8 @@ void newTicket() {
 // ----- "View Ticket(s)" option ----- //
 
 // - main function - //
+
+// prompts user for which tickets they would like to view, displays each ticket with information.
 void viewTickets() {
     string inp;
 
@@ -1056,7 +1056,7 @@ void viewTickets() {
                     default:
                         sel = "View All";
 
-                        tsk = true;
+                        bug = true;
                         enh = true;
                         tsk = true;
 
@@ -1074,33 +1074,33 @@ void viewTickets() {
             Console.Write("\n\n VIEW TICKET(S):\n-----------------");
 
             if(bug) {
-                Console.Write($"\n\n VIEW TICKET(S):\n-----------------\n\n Bug/Debug:\n------------");
+                Console.Write("\n\n Bug/Debug:\n------------");
 
                 if(bugTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < bugTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{bugTicketFile.Tickets[i].Summary}\"\n    Status: \"{bugTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{bugTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{bugTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{bugTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", bugTicketFile.Tickets[i].Watching)}\"");
+                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{bugTicketFile.Tickets[i].Summary}\"\n    Status: \"{bugTicketFile.Tickets[i].Status}\"\n    Priority level: \"{bugTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{bugTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{bugTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", bugTicketFile.Tickets[i].Watching)}\"\n    Severity level: \"{bugTicketFile.Tickets[i].Severity}");
                     }
                 } else {
                     Console.WriteLine("\nNo Bug/Debug tickets found");
                 }
             } 
             if(enh) {
-                Console.Write($"\n\n Enhancement:\n--------------");
+                Console.Write("\n\n Enhancement:\n--------------");
 
                 if(enhancementTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < enhancementTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{enhancementTicketFile.Tickets[i].Summary}\"\n    Status: \"{enhancementTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{enhancementTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{enhancementTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{enhancementTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Watching)}\"");
+                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{enhancementTicketFile.Tickets[i].Summary}\"\n    Status: \"{enhancementTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{enhancementTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{enhancementTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{enhancementTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Watching)}\"\n    Software requirements: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Software)}\"\n    Estimated cost: \"{enhancementTicketFile.Tickets[i].Cost}\"\n    Reason: \"{enhancementTicketFile.Tickets[i].Reason}\"");
                     }
                 } else {
                     Console.WriteLine("\nNo Enhancement tickets found");
                 }
             }
             if(tsk) {
-                Console.Write($"\n\n Task:\n-------");
+                Console.Write("\n\n Task:\n-------");
 
                 if(taskTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < taskTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{taskTicketFile.Tickets[i].Summary}\"\n    Status: \"{taskTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{taskTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{taskTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{taskTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", taskTicketFile.Tickets[i].Watching)}\"");
+                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{taskTicketFile.Tickets[i].Summary}\"\n    Status: \"{taskTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{taskTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{taskTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{taskTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", taskTicketFile.Tickets[i].Watching)}\"\n    Project name: \"{taskTicketFile.Tickets[i].ProjectName}\"\n    Due date: \"{taskTicketFile.Tickets[i].DueDate:MMMM dd, yyyy}\"");
                     }
                 } else {
                     Console.WriteLine("\nNo Task tickets found");

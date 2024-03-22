@@ -1,37 +1,40 @@
 using NLog;
 
-public class TicketFile {
-    public List<Ticket> Tickets { get; set; }
+public class BugTicketFile {
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
-    
-    public TicketFile() {
-        Tickets = new List<Ticket>();
-    }
 
-    // adds the ticket to the object's Ticket field (there will be one object for each Ticket type)
-    public void AddToList(Ticket ticket) {
+    public List<BugTicket> Tickets = new List<BugTicket>();
+
+    public void AddToList(BugTicket ticket) {
         Tickets.Add(ticket);
 
-        string type;
+        Console.WriteLine();
+        logger.Info($"Bug Ticket added! ");
+    }
+}
 
-        if(ticket is BugTicket) {
-            type = "Bug";
-        } else if(ticket is EnhancementTicket) {
-            type = "Enhancement";
-        } else {
-            type = "Task";
-        }
+public class EnhancementTicketFile {
+    Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
+
+    public List<EnhancementTicket> Tickets = new List<EnhancementTicket>();
+
+    public void AddToList(EnhancementTicket ticket) {
+        Tickets.Add(ticket);
 
         Console.WriteLine();
-        logger.Info($"{type} Ticket added! ");
+        logger.Info($"Enhancement Ticket added! ");
     }
+}
 
-    public void ReadFromFile(Ticket ticket) {
-        // TODO: ADD FUNCTIONALITY
+public class TaskTicketFile {
+    Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
+
+    public List<TaskTicket> Tickets = new List<TaskTicket>();
+
+    public void AddToList(TaskTicket ticket) {
+        Tickets.Add(ticket);
+
+        Console.WriteLine();
+        logger.Info($"Task Ticket added! ");
     }
-
-    public void SaveToFile(Ticket ticket) {
-        // TODO: ADD FUNCTIONALITY
-    }
-
 }

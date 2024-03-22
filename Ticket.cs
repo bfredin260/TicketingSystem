@@ -5,10 +5,6 @@ public abstract class Ticket {
     public string Submitter { get; set; }
     public string Assigned { get; set; }
     public List<string> Watching { get; set; }
-
-    public Ticket() {
-        Watching = new List<string>();
-    }
 }
 
 public class BugTicket : Ticket {
