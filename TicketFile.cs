@@ -27,7 +27,10 @@ public class TicketFile {
     }
 
     public void AddToFile(Ticket ticket) {
-        // TODO: ADD FUNCTIONALITY
+        StreamWriter sw = new StreamWriter("TempTickets.csv");
+
+        sw.Write(ticket.ToString());
+        sw.Close();
     }
 
     public void ReadFromFile(Ticket ticket) {

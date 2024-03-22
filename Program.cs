@@ -11,6 +11,9 @@ TicketFile bugTicketFile = new TicketFile(),
            taskTicketFile = new TicketFile()
 ;
 
+// creates/clears temp file to be used each time the program runs
+File.WriteAllText("TempTickets.csv", "");
+
 
 
 // ==================== MAIN PROGRAM FUNCTIONALITY ==================== //
@@ -29,26 +32,31 @@ do{
         // add ticket for "1"
         case "1":
             newTicket();
+
             break;
 
         // view tickets for "2"
         case "2":
+            // viewTickets();
 
             break;
         
         // load tickets for "3"
         case "3":
+            // loadTickets();
 
             break;
 
         // save tickets for "4"
         case "4":
+            // saveTickets();
 
             break;
 
         // exit loop when user chooses "" (press enter)
         case "":
             info("Closing program...");
+
             break;
     }
 
@@ -70,6 +78,7 @@ string getInput(string prompt) {
 
 // shortens the input to a single character string
 string shorten(string input) {
+
     // convert input to lowercase, then first character only, then back to string
     // ("Tree" becomes "t")
     return input.ToLower()
@@ -103,6 +112,7 @@ void warn(string msg) {
 string getChoice() {
     string inp;
     do {
+
         // gets input from user
         inp = getInput("\n\n SELECT:\n---------\n\n1) Add Ticket\n2) View Ticket(s)\n3) Load Ticket(s) from File\n4) Save Tickets to File\n\nEnter to exit\n\n> ");
     
@@ -118,24 +128,34 @@ string getChoice() {
                 switch(inp) {
                     case "1":
                         sel = "Add Ticket";
+
                         break;
+
                     case "2":
                         sel = "View Ticket(s)";
+
                         break;
+
                     case "3":
                         sel = "Load Ticket(s) from File";
+
                         break;
+
                     default:
                         sel = "Save Ticket(s) to File";
+
                         break;
                 }
+
                 info($"Selected: \"{sel}\"");
+
             } else {
 
                 // if not, warn user and repeat the loop
                 warn("Please enter a valid option!");
             }
         }
+
     // loop repeats until the user inputs a valid choice
     } while (inp != "1" 
                 && inp != "2" 
@@ -154,6 +174,7 @@ string getChoice() {
 string getStatus() {
     string inp;
     do{
+
         // get input from user
         inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Is this ticket currently open?\n\ny) Yes\nn) No\n\nEnter to cancel\n\n> ");
 
@@ -168,12 +189,17 @@ string getStatus() {
             switch(inp) {
                 case "y":
                     inp = "Open";
+
                     break;
+
                 case "n":
                     inp = "Closed";
+
                     break;
+
                 default:
                     warn("Please enter \"y\" or \"n\" only!");
+
                     break;
             }
         }
@@ -207,15 +233,22 @@ Level getLevel(string prompt) {
             switch(inp) {
                 case "h":
                     lev = Level.High;
+                    
                     break;
                 case "m":
+
                     lev = Level.Medium;
+                
                     break;
+                
                 case "l":
                     lev = Level.Low;
+                
                     break;
+                
                 default:
                     warn("Please enter \"h\", \"m\" or \"l\" only!");
+                
                     break; 
             }
         }
@@ -238,8 +271,7 @@ List<string> getStringList(string prompt, string field, bool isNoneValid) {
     List<string> wat = new List<string>();
 
     // same as the do-while loop, except it keeps track of the index (so I can number the watchers for the user)
-    
-    // for (int i = 1; (inp != "done" || i == 2) && inp != "" && (!isNoneValid || (i == 1 && isNoneValid && inp.ToLower() !="none")); i++) {
+    // conditional tests for all values that are valid so that it can continue the loop
     for (int i = 1; !(inp.ToLower() == "done" && i > 2 || (inp.ToLower() == "none" && isNoneValid && i == 2) || inp == ""); i++) {
         Console.Write($"{prompt} (#{i})\n\nEnter to cancel");
 
@@ -328,14 +360,17 @@ TimeSpan getEstimatedTimeSpan() {
         switch (i) {
             case 0:
                 ymd = "Years";
+                
                 break;
             
             case 1:
                 ymd = "Months";
+                
                 break;
             
             default:
                 ymd = "Days";
+                
                 break;
         }
 
@@ -384,14 +419,20 @@ TimeSpan getEstimatedTimeSpan() {
         switch(i) {
             case 0:
                 years = int.Parse(inp);
+            
                 break;
+            
             case 1:
                 months = int.Parse(inp);
+            
                 break;
+            
             default:
                 days = int.Parse(inp);
+            
                 break;
         }
+
 
         info($"{ymd} updated: {val}");
     }
@@ -649,7 +690,7 @@ bool isDateTimeCanceled(DateTime input) {
 
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
-bool newTicket() {
+void newTicket() {
     string inp;
 
     // loop determines which type of ticket to add, using user input with validation
@@ -670,15 +711,22 @@ bool newTicket() {
                 switch(inp) {
                     case "1":
                         sel = "Bug/Defect";
+                    
                         break;
+                    
                     case "2":
                         sel = "Enhancement";
+                    
                         break;
+                    
                     default:
                         sel = "Task";
+                    
                         break;
                 }
+                
                 info($"Selected: \"{sel}\"");
+            
             } else {
 
                 // if not, warn user and restart loop
@@ -696,7 +744,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringCanceled(inp)) {
-        return false;
+        return;
     }
     
     // gets summary for ticket
@@ -704,7 +752,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringCanceled(smr)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log added summary
@@ -716,7 +764,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringCanceled(sts)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log added status
@@ -728,7 +776,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isLevelCanceled(pri)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log added priority
@@ -740,7 +788,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringCanceled(sbm)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log added submitter
@@ -752,7 +800,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringCanceled(assi)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log assigned
@@ -764,7 +812,7 @@ bool newTicket() {
 
     // checks if user hit enter to cancel
     if(isStringListCanceled(watc)) {
-        return false;
+        return;
     } else {
 
         // if user DID NOT hit enter, log watchers
@@ -782,7 +830,7 @@ bool newTicket() {
 
             // checks if user hit enter to cancel
             if(isLevelCanceled(sev)) {
-                return false;
+                return;
 
             // if the ticket was NOT cancelled:
             } else {
@@ -805,6 +853,9 @@ bool newTicket() {
             // add bug ticket to the list in the associated object
             bugTicketFile.AddToList(bgTkt);
 
+            // add bug ticket to the temp file 
+            bugTicketFile.AddToFile(bgTkt);
+
             break;
 
         // enhancement ticket
@@ -815,7 +866,8 @@ bool newTicket() {
 
             // checks if user hit enter to cancel
             if(isStringListCanceled(sftw)) {
-                return false;
+                return;
+
             } else {
                 if(sftw[0] != "none"){
 
@@ -837,7 +889,7 @@ bool newTicket() {
 
             // checks if user hit enter to cancel
             if(isDoubleCanceled(cst)) {
-                return false;
+                return;
             } else {
                 
                 // if user DID NOT hit enter, log cost
@@ -849,7 +901,7 @@ bool newTicket() {
             
             // checks if user hit enter to cancel
             if(isStringCanceled(rsn)) {
-                return false;
+                return;
             } else {
                 
                 // if user DID NOT hit enter, log reason
@@ -859,7 +911,7 @@ bool newTicket() {
             TimeSpan est = getEstimatedTimeSpan();
 
             if(isTimeSpanCanceled(est)) {
-                return false;
+                return;
             } else {
 
                 // if user DID NOT hit enter, log TimeSpan estimate
@@ -897,8 +949,11 @@ bool newTicket() {
                 Estimate = est
             };
 
-            // add bug ticket to the list in the associated object
+            // add enhancement ticket to the list in the associated object
             enhancementTicketFile.AddToList(enTkt);
+
+            // add enhancement ticket to the temp file 
+            enhancementTicketFile.AddToFile(enTkt);
 
             break;
 
@@ -910,7 +965,7 @@ bool newTicket() {
 
             // checks if user hit enter to cancel
             if(isStringCanceled(pjn)) {
-                return false;
+                return;
             } else {
 
                 // if user DID NOT hit enter, log project name
@@ -922,7 +977,7 @@ bool newTicket() {
 
             // checks if user hit enter to cancel
             if(isDateTimeCanceled(duda)) {
-                return false;
+                return;
             } else {
 
                 // if user DID NOT hit enter, log cost
@@ -945,8 +1000,9 @@ bool newTicket() {
             // add task ticket to the list in the associated object
             taskTicketFile.AddToList(tskTkt);
 
+            // add task ticket to the temp file 
+            taskTicketFile.AddToFile(tskTkt);
+
             break;
     }
-
-    return true;
 }
