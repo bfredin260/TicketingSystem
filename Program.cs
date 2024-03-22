@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using Microsoft.Win32.SafeHandles;
+using NLog;
 
 // ==================== VARIABLES ==================== //
 
@@ -37,7 +38,7 @@ do{
 
         // view tickets for "2"
         case "2":
-            // viewTickets();
+            viewTickets();
 
             break;
         
@@ -60,6 +61,7 @@ do{
             break;
     }
 
+// loop repeats until user hits enter to exit the choice menu
 } while (choice != "");
 
 
@@ -88,7 +90,7 @@ string shorten(string input) {
 }
 
 
-// -- just to shorten code a little bit --
+// - just to shorten code a little bit -
 
 // just a long line to divide each prompt
 void line() {
@@ -168,7 +170,9 @@ string getChoice() {
 }
 
 
-// ----- "Add Ticket" Choice -----
+// ----- "Add Ticket" Choice -----//
+
+// - getters for user input - //
 
 // get user's input for status field while adding a ticket
 string getStatus() {
@@ -610,8 +614,8 @@ DateTime getDueDate() {
     return new DateTime(year, month, day);
 }
 
-// ----- Test for Canceled methods ----- //
 
+// - test for canceled methods - //
 // checks if user hit enter to cancel
 
 // for strings
@@ -686,7 +690,8 @@ bool isDateTimeCanceled(DateTime input) {
     }
 }
 
-// ----- MAIN FUNCTION ----- //
+
+// - main function - //
 
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
@@ -853,9 +858,6 @@ void newTicket() {
             // add bug ticket to the list in the associated object
             bugTicketFile.AddToList(bgTkt);
 
-            // add bug ticket to the temp file 
-            bugTicketFile.AddToFile(bgTkt);
-
             break;
 
         // enhancement ticket
@@ -952,9 +954,6 @@ void newTicket() {
             // add enhancement ticket to the list in the associated object
             enhancementTicketFile.AddToList(enTkt);
 
-            // add enhancement ticket to the temp file 
-            enhancementTicketFile.AddToFile(enTkt);
-
             break;
 
         // only other option is a task ticket (inp =/= "" here)
@@ -1000,9 +999,122 @@ void newTicket() {
             // add task ticket to the list in the associated object
             taskTicketFile.AddToList(tskTkt);
 
-            // add task ticket to the temp file 
-            taskTicketFile.AddToFile(tskTkt);
-
             break;
     }
+}
+
+
+// ----- "View Ticket(s)" option ----- //
+
+// - main function - //
+void viewTickets() {
+    string inp;
+
+    // bools so that the program knows which ticket(s) to view using user's inputs
+    bool bug = false;
+    bool enh = false;
+    bool tsk = false;
+
+    // loop determines which type of ticket to view, using user input with validation
+    do { 
+        inp = getInput("\n\n VIEW TICKET(S):\n-----------------\n\n-Which tickets would you like to view?\n\n1)Bug/Debug\n2)Enhancement\n3)Task\n4)View All\n\nEnter to cancel\n\n> ");
+
+        // if the input is NOT empty (the user did NOT hit enter)
+        if(inp != "") {
+
+            // convert input to lowercase, then first character only, then back to string
+            // ("Tree" becomes "t")
+            inp = shorten(inp);
+
+            string sel = "";
+
+            // if input is one of the four options, output it using logger AND set corresponding bool(s) to true
+            if(inp == "1" || inp == "2" || inp == "3" || inp == "4") {
+
+                switch(inp) {
+                    case "1":
+                        sel = "Bug/Defect";
+
+                        bug = true;
+                    
+                        break;
+                    
+                    case "2":
+                        sel = "Enhancement";
+
+                        enh = true;
+                    
+                        break;
+                    
+                    case "3":
+                        sel = "Task";
+
+                        tsk = true;
+                    
+                        break;
+                    
+                    default:
+                        sel = "View All";
+
+                        tsk = true;
+                        enh = true;
+                        tsk = true;
+
+                        break;
+                }
+                
+                info($"Selected: \"{sel}\"");
+            
+            } else {
+
+                // if not, warn user and restart loop
+                warn("Please enter a valid option!");
+            }
+
+            Console.Write("\n\n VIEW TICKET(S):\n-----------------");
+
+            if(bug) {
+                Console.Write($"\n\n VIEW TICKET(S):\n-----------------\n\n Bug/Debug:\n------------");
+
+                if(bugTicketFile.Tickets.Count > 0) {
+                    for(int i = 0; i < bugTicketFile.Tickets.Count; i++) {
+                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{bugTicketFile.Tickets[i].Summary}\"\n    Status: \"{bugTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{bugTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{bugTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{bugTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", bugTicketFile.Tickets[i].Watching)}\"");
+                    }
+                } else {
+                    Console.WriteLine("\nNo Bug/Debug tickets found");
+                }
+            } 
+            if(enh) {
+                Console.Write($"\n\n Enhancement:\n--------------");
+
+                if(enhancementTicketFile.Tickets.Count > 0) {
+                    for(int i = 0; i < enhancementTicketFile.Tickets.Count; i++) {
+                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{enhancementTicketFile.Tickets[i].Summary}\"\n    Status: \"{enhancementTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{enhancementTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{enhancementTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{enhancementTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Watching)}\"");
+                    }
+                } else {
+                    Console.WriteLine("\nNo Enhancement tickets found");
+                }
+            }
+            if(tsk) {
+                Console.Write($"\n\n Task:\n-------");
+
+                if(taskTicketFile.Tickets.Count > 0) {
+                    for(int i = 0; i < taskTicketFile.Tickets.Count; i++) {
+                        Console.WriteLine($"\nTicket #{i}:\n    Summary: \"{taskTicketFile.Tickets[i].Summary}\"\n    Status: \"{taskTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{taskTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{taskTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{taskTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", taskTicketFile.Tickets[i].Watching)}\"");
+                    }
+                } else {
+                    Console.WriteLine("\nNo Task tickets found");
+                }
+            }
+        }
+    
+    // loop runs until user inputs "1", "2", "3", "4 or "" (they pressed enter)
+    } while (inp != "1" 
+                && inp != "2" 
+                && inp != "3"
+                && inp != "4"
+                && inp != ""
+            )
+    ;
+
 }
