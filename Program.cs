@@ -323,7 +323,7 @@ TimeSpan getEstimatedTimeSpan() {
     // this needs to loop 3 times (one for years, one for months, one for days)
     for(int i = 0; i < 3; i++) {
 
-        // string that holds "years", "months", or "years" for user's prompt
+        // string that holds "years", "months", or "days" for user's prompt
         string ymd;
         switch (i) {
             case 0:
@@ -399,6 +399,153 @@ TimeSpan getEstimatedTimeSpan() {
     return new TimeSpan((years * 365) + (months * 28) + days, 0, 0, 0);
 }
 
+// gets user's input for a project name field while adding a ticket
+string getProjectName() {
+    string inp;
+    do {
+        inp = getInput("\n\n ADD TICKET:\n-------------\n\n-Enter a name for this task:\n\nEnter to cancel\n\n> ");
+
+        if(string.IsNullOrWhiteSpace(inp)) {
+            warn("Enter a valid name for this task!");
+        }
+
+    } while (inp != "" || !(string.IsNullOrEmpty(inp) && inp == ""));
+
+    return inp;
+}
+
+DateTime getDueDate() {
+    string inp;
+    int val = -1;
+
+    int day = 0;
+    int month = 0;
+    int year = 0;
+
+    // loops 3 times, once for month, then day, then year inputs
+    for (int i = 1; i < 4; i++) {
+
+        // holds "month", "year" or "day" for prompt
+        string ymd;
+
+        // holds lower bounds value, non-inclusive
+        int low;
+
+        // holds upper bounds value, non-inclusive
+        int high;
+
+        // gets year/month/date input and low and high values depending on iteration of loop
+        switch(i) {
+            case 1:
+                ymd = "month";
+                low = 0;
+                high = 13;
+
+                break;
+
+            case 2:
+                ymd = "year";
+                
+                if(DateTime.Now.Month < month)
+                    low = DateTime.Now.Year - 1;
+                else {
+                    low = DateTime.Now.Year;
+                }
+
+                // max year value of DateTime class
+                high = 9999;
+
+                break;
+
+            default:
+                ymd = "day";
+                low = 0;
+                
+                // checks if month is NOT february right away since that has leap years
+                if(month != 2) {
+
+                    // april, june, september and november all have 30 days always
+                    if(month == 4 || month == 6 || month == 9 || month == 11) {
+                        high = 31;
+
+                    // if it is not those months, or february, then the month has 31 days
+                    } else {
+                        high = 32;
+                    }
+                
+                // if it IS february:
+                } else {
+
+                    // then checks for leap year
+                    if(DateTime.IsLeapYear(year)) {
+
+                        //leap year february has 29 days
+                        high = 30;
+
+                    // if not a leap year, then it must have 28 days
+                    } else {
+                        high = 29;
+                    }
+                }
+
+                break;
+        }
+
+        // loop to get input from user
+        do {
+            inp = getInput($"\n\n ADD TICKET:\n-------------\n\n-In which {ymd} is this ticket due? ({low + 1}-{low - 1})\n\nEnter to cancel\n\n >");
+
+            // make sure string is NOT "" (user hit enter)
+            if (inp != "") {
+
+                // check if the user entered a number
+                if(int.TryParse(inp, out val)) {
+
+                    // check if the inputted value is NOT within the bounds of the input requirement to warn user
+                    if (!(val < high && val > low)) {
+                        warn($"Enter a value between {low + 1} and {high - 1} for {ymd}!");
+                    }
+
+                // if they did not, then warn the user
+                } else {
+                    warn("Please enter a whole number!");
+
+                    // set value to negative so that the loop is sure to repeat
+                    val = -1;
+                }
+            
+            // if input value IS "" (user hit enter), return DateTime(0);
+            } else {
+                return new DateTime(0);
+            }
+
+            // set value to the variable corresponding to the iteration of the loop
+            switch(i) {
+                case 1:
+                    month = val;
+
+                    break;
+
+                case 2:
+                    year = val;
+
+                    break;
+
+                default:
+                    day = val;
+
+                    break;
+            }
+        } while (!
+                    (val < high 
+                        && val > low
+                    )
+            
+        );
+    }
+
+    return new DateTime(year, month, day);
+}
 
 // ----- Test for Canceled methods ----- //
 
@@ -720,7 +867,21 @@ bool newTicket() {
 
         // only other option is a task ticket (inp =/= "" here)
         default:
-            // TODO: ADD FUNCTIONALITY
+            
+            // gets project name field for task ticket
+            string pjn = getProjectName();
+
+            // checks if user hit enter to cancel
+            if(isStringCanceled(pjn)) {
+                return false;
+            } else {
+
+                // if user DID NOT hit enter, log cost
+                info($"Added project name to ticket: \"{pjn}\"");
+            }
+
+            // gets due date field for task ticket
+            DateTime duda = getDueDate();
 
             break;
     }
