@@ -37,7 +37,7 @@ public class EnhancementTicket : Ticket {
 
 public class TaskTicket : Ticket {
     public string ProjectName { get; set; }
-    public DateOnly DueDate { get; set; }
+    public DateTime DueDate { get; set; }
 
     public override string FileLine()
     {

@@ -409,11 +409,16 @@ string getProjectName() {
             warn("Enter a valid name for this task!");
         }
 
-    } while (inp != "" || !(string.IsNullOrEmpty(inp) && inp == ""));
+    } while (!
+        (inp == "" 
+            || !string.IsNullOrWhiteSpace(inp)
+        )
+    );
 
     return inp;
 }
 
+// gets user's input for a due date field while adding a ticket
 DateTime getDueDate() {
     string inp;
     int val = -1;
@@ -421,6 +426,8 @@ DateTime getDueDate() {
     int day = 0;
     int month = 0;
     int year = 0;
+
+    string inf = "";
 
     // loops 3 times, once for month, then day, then year inputs
     for (int i = 1; i < 4; i++) {
@@ -446,21 +453,31 @@ DateTime getDueDate() {
             case 2:
                 ymd = "year";
                 
-                if(DateTime.Now.Month < month)
+                if(DateTime.Now.Month <= month)
                     low = DateTime.Now.Year - 1;
                 else {
                     low = DateTime.Now.Year;
                 }
 
-                // max year value of DateTime class
-                high = 9999;
+                // max year value of DateTime class is 9999
+                high = 10000;
 
                 break;
 
             default:
                 ymd = "day";
-                low = 0;
                 
+                // first checks if due date is within the current month
+                if(year == DateTime.Now.Year && month == DateTime.Now.Month) {
+
+                    // if it is, that means the earlest that the task can be completed is tomorrow
+                    low = DateTime.Now.Day;
+
+                // otherwise, lowest day is the first of the month
+                } else {
+                    low = 0;
+                }
+
                 // checks if month is NOT february right away since that has leap years
                 if(month != 2) {
 
@@ -493,7 +510,7 @@ DateTime getDueDate() {
 
         // loop to get input from user
         do {
-            inp = getInput($"\n\n ADD TICKET:\n-------------\n\n-In which {ymd} is this ticket due? ({low + 1}-{low - 1})\n\nEnter to cancel\n\n >");
+            inp = getInput($"\n\n ADD TICKET:\n-------------\n\n-In which {ymd} is this ticket due? ({low + 1}-{high - 1})\n\nEnter to cancel\n\n> ");
 
             // make sure string is NOT "" (user hit enter)
             if (inp != "") {
@@ -520,9 +537,11 @@ DateTime getDueDate() {
             }
 
             // set value to the variable corresponding to the iteration of the loop
+            inf = $"{val}";
             switch(i) {
                 case 1:
                     month = val;
+                    inf = $"{new DateTime(1, month, 1):MMMM}";
 
                     break;
 
@@ -536,12 +555,15 @@ DateTime getDueDate() {
 
                     break;
             }
+            
         } while (!
                     (val < high 
                         && val > low
                     )
             
         );
+
+        info($"Added {ymd} to due date: \"{inf}\"");
     }
 
     return new DateTime(year, month, day);
@@ -599,7 +621,7 @@ bool isLevelCanceled(Level input) {
     }
 }
 
-
+// for TimeSpans
 bool isTimeSpanCanceled(TimeSpan input) {
     if(input == new TimeSpan(0)) {
         warn("Cancelling...");
@@ -610,6 +632,21 @@ bool isTimeSpanCanceled(TimeSpan input) {
         return false;
     }
 }
+
+// for DateTimes
+bool isDateTimeCanceled(DateTime input) {
+    if(input == new DateTime(0)) {
+        warn("Cancelling...");
+
+        // returns out of the function if user hit enter.
+        return true;
+    } else {
+        return false;
+    }
+}
+
+// ----- MAIN FUNCTION ----- //
+
 // adds a new ticket to the list and temporary file
 // asks user for inputs for ticket type and fields
 bool newTicket() {
@@ -876,12 +913,37 @@ bool newTicket() {
                 return false;
             } else {
 
-                // if user DID NOT hit enter, log cost
+                // if user DID NOT hit enter, log project name
                 info($"Added project name to ticket: \"{pjn}\"");
             }
 
             // gets due date field for task ticket
             DateTime duda = getDueDate();
+
+            // checks if user hit enter to cancel
+            if(isDateTimeCanceled(duda)) {
+                return false;
+            } else {
+
+                // if user DID NOT hit enter, log cost
+                Console.WriteLine();
+                logger.Info($"Added due date to ticket: \"{duda:MMMM dd, yyyy}\"");
+            }
+
+            // create new task ticket with the given inputs
+            TaskTicket tskTkt = new TaskTicket() {
+                Summary = smr,
+                Status = sts,
+                Priority = pri,
+                Submitter = sbm,
+                Assigned = assi,
+                Watching = watc,
+                ProjectName = pjn,
+                DueDate = duda
+            };
+
+            // add task ticket to the list in the associated object
+            taskTicketFile.AddToList(tskTkt);
 
             break;
     }
