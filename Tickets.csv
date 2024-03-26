@@ -1,2 +1,3 @@
-TicketID,Summary,Status,Priority level,Submitter,Assigned to,Watching,Severity level
+TicketID|Summary|Status|Priority level|Submitter|Assigned to|Watching|Severity level
 2|asd|Closed|Low|asd|asd|ads|Low
+4|asd|Closed|Low|asd|as|dasd|Low

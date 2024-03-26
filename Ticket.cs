@@ -1,5 +1,3 @@
-using NLog.Targets;
-
 public abstract class Ticket {
     public int TicketID = 1;
     public string Summary { get; set; }
@@ -9,15 +7,26 @@ public abstract class Ticket {
     public string Assigned { get; set; }
     public List<string> Watching { get; set; }
 
+    // constructor
     public Ticket() {
-        StreamReader sr = new StreamReader("TempTickets.csv");
+        StreamReader sr = new("TempTickets.csv");
+
+        // default value of 0 so that the first ticketID is 1
         string line = "0";
 
+        // loop until the last line of the temp file
         while (!sr.EndOfStream) {
+
+            // set line to that line
+            // might be a little weird to set this over and over, but once the loop ends it will be set to the final line
             line = sr.ReadLine();
         }
 
+        // set ticket ID to 1 over the highest ticket ID (incrementing)
         TicketID = int.Parse(line.Split("|")[0]) + 1;
+
+        // close stream
+        sr.Close();
     }
 }
 
