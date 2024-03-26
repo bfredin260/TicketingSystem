@@ -1,6 +1,16 @@
 using NLog;
 
-public class BugTicketFile {
+public abstract class TicketFile {
+    public void AddToTemp(string ticket) {
+        StreamWriter sw = new StreamWriter("TempTickets.csv", append: true);
+
+        sw.WriteLine(ticket);
+
+        sw.Close();
+    }
+}
+
+public class BugTicketFile : TicketFile{
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
     public List<BugTicket> Tickets = new List<BugTicket>();
@@ -13,7 +23,7 @@ public class BugTicketFile {
     }
 }
 
-public class EnhancementTicketFile {
+public class EnhancementTicketFile : TicketFile {
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
     public List<EnhancementTicket> Tickets = new List<EnhancementTicket>();
@@ -26,7 +36,7 @@ public class EnhancementTicketFile {
     }
 }
 
-public class TaskTicketFile {
+public class TaskTicketFile : TicketFile{
     Logger logger = LogManager.Setup().LoadConfigurationFromFile(Directory.GetCurrentDirectory() + "//nlog.config").GetCurrentClassLogger();
 
     public List<TaskTicket> Tickets = new List<TaskTicket>();

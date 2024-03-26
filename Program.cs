@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
-using NLog;
+﻿using NLog;
 
 // ==================== VARIABLES ==================== //
 
@@ -11,7 +10,7 @@ BugTicketFile bugTicketFile = new BugTicketFile();
 EnhancementTicketFile enhancementTicketFile = new EnhancementTicketFile();
 TaskTicketFile taskTicketFile = new TaskTicketFile();
 
-// creates/clears temp file to be used each time the program runs
+// TempTickets.csv to store temporary data
 File.WriteAllText("TempTickets.csv", "");
 
 
@@ -43,13 +42,13 @@ do{
         
         // load tickets for "3"
         case "3":
-            // loadTickets();
+            loadTickets();
 
             break;
 
         // save tickets for "4"
         case "4":
-            // saveTickets();
+            saveTickets();
 
             break;
 
@@ -83,8 +82,8 @@ string shorten(string input) {
     // convert input to lowercase, then first character only, then back to string
     // ("Tree" becomes "t")
     return input.ToLower()
-                .ToCharArray()[0]
-                .ToString()
+        .ToCharArray()[0]
+        .ToString()
     ;
 }
 
@@ -93,6 +92,7 @@ string shorten(string input) {
 
 // just a long line to divide each prompt
 void line() {
+    Console.Clear();
     Console.WriteLine("=========================================================================\n\n");
 }
 
@@ -115,7 +115,7 @@ string getChoice() {
     do {
 
         // gets input from user
-        inp = getInput("\n\n SELECT:\n---------\n\n1) Add Ticket\n2) View Ticket(s)\n3) Load Ticket(s) from File\n4) Save Tickets to File\n\nEnter to exit\n\n> ");
+        inp = getInput("\n\n SELECT:\n---------\n\n1) Add Ticket\n2) View Ticket(s)\n3) Load Ticket(s) from File\n4) Save Ticket(s) to File\n\nEnter to exit\n\n> ");
     
         // if the input is NOT empty:
         if(inp != "") {
@@ -170,6 +170,7 @@ string getChoice() {
 
 
 // ----- "Add Ticket" Choice -----//
+
 
 // - getters for user input - //
 
@@ -436,7 +437,6 @@ TimeSpan getEstimatedTimeSpan() {
                 break;
         }
 
-
         info($"{ymd} updated: {val}");
     }
 
@@ -565,6 +565,28 @@ DateTime getDueDate() {
                     // check if the inputted value is NOT within the bounds of the input requirement to warn user
                     if (!(val < high && val > low)) {
                         warn($"Enter a value between {low + 1} and {high - 1} for {ymd}!");
+
+                    } else {
+                        // set value to the variable corresponding to the iteration of the loop
+                        inf = $"{val}";
+                        switch(i) {
+                            case 1:
+                                month = val;
+                                inf = $"{new DateTime(1, month, 1):MMMM}";
+
+                                break;
+
+                            case 2:
+                                year = val;
+
+                                break;
+
+                            default:
+                                day = val;
+
+                                break;
+                        }
+    
                     }
 
                 // if they did not, then warn the user
@@ -579,31 +601,11 @@ DateTime getDueDate() {
             } else {
                 return new DateTime(0);
             }
-
-            // set value to the variable corresponding to the iteration of the loop
-            inf = $"{val}";
-            switch(i) {
-                case 1:
-                    month = val;
-                    inf = $"{new DateTime(1, month, 1):MMMM}";
-
-                    break;
-
-                case 2:
-                    year = val;
-
-                    break;
-
-                default:
-                    day = val;
-
-                    break;
-            }
             
         } while (!
-                    (val < high 
-                        && val > low
-                    )
+            (val < high 
+                && val > low
+            )
             
         );
 
@@ -857,6 +859,9 @@ void newTicket() {
             // add bug ticket to the list in the associated object
             bugTicketFile.AddToList(bgTkt);
 
+            // add bugTicket to the temp file
+            bugTicketFile.AddToTemp(bgTkt.ToString());
+
             break;
 
         // enhancement ticket
@@ -932,6 +937,7 @@ void newTicket() {
                 // # of remaining days is days - (months * 28) [subtracts the amount of days in that many months]
                 estDys = estDys - (estMts * 28);
 
+                Console.WriteLine();
                 logger.Info($"Added estimated time span to ticket: \"{estYrs} years, {estMts} months, {estDys} days.\"");
             }
 
@@ -951,6 +957,9 @@ void newTicket() {
 
             // add enhancement ticket to the list in the associated object
             enhancementTicketFile.AddToList(enTkt);
+
+            // add enhancementTicket to the temp file
+            enhancementTicketFile.AddToTemp(enTkt.ToString());
 
             break;
 
@@ -997,12 +1006,16 @@ void newTicket() {
             // add task ticket to the list in the associated object
             taskTicketFile.AddToList(tskTkt);
 
+            // add taskTicket to the temp file
+            taskTicketFile.AddToTemp(tskTkt.ToString());
+
             break;
     }
 }
 
 
 // ----- "View Ticket(s)" option ----- //
+
 
 // - main function - //
 
@@ -1017,7 +1030,7 @@ void viewTickets() {
 
     // loop determines which type of ticket to view, using user input with validation
     do { 
-        inp = getInput("\n\n VIEW TICKET(S):\n-----------------\n\n-Which tickets would you like to view?\n\n1)Bug/Debug\n2)Enhancement\n3)Task\n4)View All\n\nEnter to cancel\n\n> ");
+        inp = getInput("\n\n VIEW TICKET(S):\n-----------------\n\n-Which tickets would you like to view?\n\n1) Bug/Defect\n2) Enhancement\n3) Task\n4) View All\n\nEnter to cancel\n\n> ");
 
         // if the input is NOT empty (the user did NOT hit enter)
         if(inp != "") {
@@ -1026,10 +1039,10 @@ void viewTickets() {
             // ("Tree" becomes "t")
             inp = shorten(inp);
 
-            string sel = "";
-
             // if input is one of the four options, output it using logger AND set corresponding bool(s) to true
             if(inp == "1" || inp == "2" || inp == "3" || inp == "4") {
+
+                string sel;
 
                 switch(inp) {
                     case "1":
@@ -1074,14 +1087,14 @@ void viewTickets() {
             Console.Write("\n\n VIEW TICKET(S):\n-----------------");
 
             if(bug) {
-                Console.Write("\n\n Bug/Debug:\n------------");
+                Console.Write("\n\n Bug/Defect:\n-------------");
 
                 if(bugTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < bugTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{bugTicketFile.Tickets[i].Summary}\"\n    Status: \"{bugTicketFile.Tickets[i].Status}\"\n    Priority level: \"{bugTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{bugTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{bugTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", bugTicketFile.Tickets[i].Watching)}\"\n    Severity level: \"{bugTicketFile.Tickets[i].Severity}");
+                        Console.WriteLine($"\nTicket #{i + 1}:\n    TicketID: {bugTicketFile.Tickets[i].TicketID}\n    Summary: \"{bugTicketFile.Tickets[i].Summary}\"\n    Status: \"{bugTicketFile.Tickets[i].Status}\"\n    Priority level: \"{bugTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{bugTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{bugTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join("\", \"", bugTicketFile.Tickets[i].Watching)}\"\n    Severity level: \"{bugTicketFile.Tickets[i].Severity}\"");
                     }
                 } else {
-                    Console.WriteLine("\nNo Bug/Debug tickets found");
+                    Console.WriteLine("\nNo Bug/Defect tickets found");
                 }
             } 
             if(enh) {
@@ -1089,7 +1102,7 @@ void viewTickets() {
 
                 if(enhancementTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < enhancementTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{enhancementTicketFile.Tickets[i].Summary}\"\n    Status: \"{enhancementTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{enhancementTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{enhancementTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{enhancementTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Watching)}\"\n    Software requirements: \"{string.Join(", ", enhancementTicketFile.Tickets[i].Software)}\"\n    Estimated cost: \"{enhancementTicketFile.Tickets[i].Cost}\"\n    Reason: \"{enhancementTicketFile.Tickets[i].Reason}\"");
+                        Console.WriteLine($"\nTicket #{i + 1}:    TicketID: {enhancementTicketFile.Tickets[i].TicketID}\n    Summary: \"{enhancementTicketFile.Tickets[i].Summary}\"\n    Status: \"{enhancementTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{enhancementTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{enhancementTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{enhancementTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join("\", \"", enhancementTicketFile.Tickets[i].Watching)}\"\n    Software requirements: \"{string.Join("\", \"", enhancementTicketFile.Tickets[i].Software)}\"\n    Estimated cost: \"{enhancementTicketFile.Tickets[i].Cost}\"\n    Reason: \"{enhancementTicketFile.Tickets[i].Reason}\"\n    Estimated time to completion: \"{enhancementTicketFile.Tickets[i].Estimate}\"");
                     }
                 } else {
                     Console.WriteLine("\nNo Enhancement tickets found");
@@ -1100,7 +1113,7 @@ void viewTickets() {
 
                 if(taskTicketFile.Tickets.Count > 0) {
                     for(int i = 0; i < taskTicketFile.Tickets.Count; i++) {
-                        Console.WriteLine($"\nTicket #{i + 1}:\n    Summary: \"{taskTicketFile.Tickets[i].Summary}\"\n    Status: \"{taskTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{taskTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{taskTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{taskTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join(", ", taskTicketFile.Tickets[i].Watching)}\"\n    Project name: \"{taskTicketFile.Tickets[i].ProjectName}\"\n    Due date: \"{taskTicketFile.Tickets[i].DueDate:MMMM dd, yyyy}\"");
+                        Console.WriteLine($"\nTicket #{i + 1}:\n    TicketID: {taskTicketFile.Tickets[i].TicketID}\n    Summary: \"{taskTicketFile.Tickets[i].Summary}\"\n    Status: \"{taskTicketFile.Tickets[i].Status}\"\n    Priority Level: \"{taskTicketFile.Tickets[i].Priority}\"\n    Submitter: \"{taskTicketFile.Tickets[i].Submitter}\"\n    Assigned to: \"{taskTicketFile.Tickets[i].Assigned}\"\n    Watching: \"{string.Join("\", \"", taskTicketFile.Tickets[i].Watching)}\"\n    Project name: \"{taskTicketFile.Tickets[i].ProjectName}\"\n    Due date: \"{taskTicketFile.Tickets[i].DueDate:MMMM dd, yyyy}\"");
                     }
                 } else {
                     Console.WriteLine("\nNo Task tickets found");
@@ -1117,4 +1130,293 @@ void viewTickets() {
             )
     ;
 
+}
+
+
+// ----- "Load Ticket(s) from File" option ----- //
+
+
+// - converters from string to class - //
+
+// gets priority level since I don't know how to Parse an enum
+Level getLevelFromString(string input) {
+    switch(input) {
+        case "High":
+            return Level.High;
+        
+        case "Medium":
+            return Level.Medium;
+
+        default:
+            return Level.Low;
+    }
+}
+
+// gets Date from yyyy/MM/dd string format
+DateTime getDateFromStringFormat(string input) {
+    string[] date = input
+        .Split("/")
+    ;
+
+    int year = int.Parse(date[0]);
+    int month = int.Parse(date[1]);
+    int day = int.Parse(date[2]);
+
+    return new DateTime(year, month, day);
+}
+
+// - main function - //
+
+// fills each Ticket type's list with the corresponding objects in the csv file
+void loadTickets() {
+
+    string choice = getInput("\n\n LOAD TICKET(S):\n-----------------\n\n-!!This will overwrite any other unsaved Tickets!!\n\n-Press \"y\" to confirm\n\n> ");
+
+    // if user does NOT hit "y", cancel "load"
+    if(choice.Length == 0 || shorten(choice) != "y") {
+        info("\"Load\" canceled");
+        return;
+    } else {
+        info("Loading from file...");
+    }
+
+    StreamWriter sw = new StreamWriter("TempTickets.csv");
+
+    StreamReader bug = new StreamReader("Tickets.csv");
+    StreamReader enh = new StreamReader("Enhancements.csv");
+    StreamReader tsk = new StreamReader("Tasks.csv");
+
+    // check to
+    if(File.ReadLines("Tickets.csv").Count() < 2 
+        && File.ReadLines("Enhancements.csv").Count() < 2 
+        && File.ReadLines("Tasks.csv").Count() < 2) {
+
+            Console.WriteLine();
+            logger.Warn("There are no tickets to load! Please save tickets to file before loading!");
+
+    } else {
+        // - bug file - //
+
+        // eats the first line of the file, since it is just headers
+        bug.ReadLine();
+
+        // loops over every line in the bug file (each line should be one ticket)
+        while (!bug.EndOfStream) {
+            string[] bugLine = bug
+                .ReadLine()
+                .Split("|")
+            ;
+            
+            // create new ticket from line
+            BugTicket bugTicket = new BugTicket() {
+                TicketID = int.Parse(bugLine[0]),
+                Summary = bugLine[1],
+                Status = bugLine[2],
+                Priority = getLevelFromString(bugLine[3]),
+                Submitter = bugLine[4],
+                Assigned = bugLine[5],
+
+                Watching = bugLine[6]
+                    .Split("~")
+                    .ToList()
+                ,
+
+                Severity = getLevelFromString(bugLine[7])
+            };
+
+            // add ticket to corresponding list
+            bugTicketFile.AddToList(bugTicket);
+
+            // add ticket to temp file
+            bugTicketFile.AddToTemp(bugTicket.ToString());
+        }
+
+        // - enhancement file - //
+
+        // eats the first line of the file, since it is just headers
+        enh.ReadLine();
+
+        // loops over every line in the enhancement file (each line should be one ticket)
+        while (!enh.EndOfStream) {
+            string[] enhLine = enh
+                .ReadLine()
+                .Split("|")
+            ;
+            
+            // create new ticket from line
+            EnhancementTicket enhTicket = new EnhancementTicket() {
+                TicketID = int.Parse(enhLine[0]),
+                Summary = enhLine[1],
+                Status = enhLine[2],
+                Priority = getLevelFromString(enhLine[3]),
+                Submitter = enhLine[4],
+                Assigned = enhLine[5],
+
+                Watching = enhLine[6]
+                    .Split("~")
+                    .ToList()
+                ,
+
+                Software = enhLine[7]
+                    .Split("~")
+                    .ToList()
+                ,
+
+                Cost = double.Parse(enhLine[8]),
+                Reason = enhLine[9],
+
+                Estimate = new TimeSpan(
+                    int.Parse(enhLine[10]), 
+                    0, 
+                    0, 
+                    0
+                )
+            };
+
+            // add ticket to corresponding list
+            enhancementTicketFile.AddToList(enhTicket);
+
+            // add ticket to temp file
+            enhancementTicketFile.AddToTemp(enhTicket.ToString());
+        }
+
+        // - task file - //
+
+        // eats the first line of the file, since it is just headers
+        tsk.ReadLine();
+        
+        // loops over every line in the bug file (each line should be one ticket)
+        while (!tsk.EndOfStream) {
+            string[] tskLine = tsk
+                .ReadLine()
+                .Split("|")
+            ;
+            
+            // create new ticket from line
+            TaskTicket tskTicket = new TaskTicket() {
+                TicketID = int.Parse(tskLine[0]),
+                Summary = tskLine[1],
+                Status = tskLine[2],
+                Priority = getLevelFromString(tskLine[3]),
+                Submitter = tskLine[4],
+                Assigned = tskLine[5],
+
+                Watching = tskLine[6]
+                    .Split("~")
+                    .ToList()
+                ,
+
+                ProjectName = tskLine[7],
+                DueDate = getDateFromStringFormat(tskLine[8])
+            };
+
+            // adds ticket to corresponding list
+            taskTicketFile.AddToList(tskTicket);
+
+            // add ticket to temp file
+            taskTicketFile.AddToTemp(tskTicket.ToString());
+        }
+
+        // -- this section just sorts the TempTickets.csv file by TicketID so that they are in order
+        // this is important because new Tickets' IDs are determined through adding 1 to the final Ticket's ID in this file.
+        string[] tempFile = File.ReadAllLines("TempTickets.csv");
+        Array.Sort(tempFile);
+
+        File.WriteAllLines("TempTickets.csv", tempFile);
+        // --
+
+        // log success to user
+        Console.WriteLine();
+        logger.Info($"Successfully loaded {File.ReadLines("TempTickets.csv").Count()} tickets from file!");
+    }
+}
+
+
+// ----- "Save Ticket(s) to File" option ----- //
+
+
+// - write line to file - //
+
+// writes the given line to a file using the given stream writer
+void writeLineToFile(StreamWriter sw, string[] line) {
+    sw.Flush();
+
+    for(int i = 0; i < line.Length; i++) {
+
+        if(i != 1 && i != line.Length - 1) {
+            sw.Write($"{line[i]}|");
+
+        } else if(i == line.Length - 1) {
+            sw.WriteLine(line[i]);
+        }
+    }
+}
+
+
+// - main function - //
+
+// writes each object to a line in the csv file corresponding to the FileType
+void saveTickets() {
+
+    string choice = getInput("\n\n SAVE TICKET(S):\n-----------------\n\n-!!This will overwrite any other saved Tickets!!\n\n-Press \"y\" to confirm\n\n> ");
+
+    // if user does NOT hit "y", cancel "save"
+    if(choice.Length == 0 || shorten(choice) != "y") {
+        info("\"Save\" canceled");
+        return;
+    } else {
+        info("Saving to file...");
+    }
+
+    StreamReader sr = new StreamReader("TempTickets.csv");
+
+    StreamWriter bug = new StreamWriter("Tickets.csv");
+    StreamWriter enh = new StreamWriter("Enhancements.csv");
+    StreamWriter tsk = new StreamWriter("Tasks.csv");
+
+    // clear all files in order to save new tickets over them
+    File.WriteAllText("Tickets.csv", "");
+    File.WriteAllText("Enhancements.csv", "");
+    File.WriteAllText("Tasks.csv", "");
+    
+    // set first line to headers in csv files.
+    bug.WriteLine("TicketID,Summary,Status,Priority level,Submitter,Assigned to,Watching,Severity level");
+    enh.WriteLine("TicketID,Summary,Status,Priority level,Submitter,Assigned to,Watching,Software,Cost,Reason,Estimated time to completion");
+    tsk.WriteLine("TicketID,Summary,Status,Priority level,Submitter,Assigned to,Watching,Project name,Due date");
+
+    while(!sr.EndOfStream) {
+        string[] line = sr
+            .ReadLine()
+            .Split("|")
+        ;
+
+        switch(line[1]) {
+            case "bug":
+                writeLineToFile(bug, line);
+
+                break;
+
+            case "enhancement":
+                writeLineToFile(enh, line);
+
+                break;
+
+            default:
+                writeLineToFile(tsk, line);
+
+                break;
+        }
+    }
+
+    bug.Flush();
+    bug.Close();
+
+    enh.Flush();
+    enh.Close();
+
+    tsk.Flush();
+    tsk.Close();
+
+    Console.WriteLine();
+    logger.Info($"Successfully saved {File.ReadLines("TempTickets.csv").Count()} tickets to file!");
 }

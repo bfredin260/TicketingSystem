@@ -1,17 +1,31 @@
+using NLog.Targets;
+
 public abstract class Ticket {
+    public int TicketID = 1;
     public string Summary { get; set; }
     public string Status { get; set; }
     public Level Priority { get; set; }
     public string Submitter { get; set; }
     public string Assigned { get; set; }
     public List<string> Watching { get; set; }
+
+    public Ticket() {
+        StreamReader sr = new StreamReader("TempTickets.csv");
+        string line = "0";
+
+        while (!sr.EndOfStream) {
+            line = sr.ReadLine();
+        }
+
+        TicketID = int.Parse(line.Split("|")[0]) + 1;
+    }
 }
 
 public class BugTicket : Ticket {
     public Level Severity { get; set; }
 
     public override string ToString() {
-        return $"bug|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{Severity}";
+        return $"{TicketID}|bug|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{Severity}";
     }
 }
 
@@ -25,7 +39,7 @@ public class EnhancementTicket : Ticket {
 
     public override string ToString()
     {
-        return $"enhancement|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{string.Join("~", Software)}|{Cost}|{Reason}|{Estimate.Days}";
+        return $"{TicketID}|enhancement|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{string.Join("~", Software)}|{Cost}|{Reason}|{Estimate.Days}";
     }
 }
 
@@ -35,6 +49,6 @@ public class TaskTicket : Ticket {
 
     public override string ToString()
     {
-        return $"bug|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{ProjectName}|{DueDate}";
+        return $"{TicketID}|task|{Summary}|{Status}|{Priority}|{Submitter}|{Assigned}|{string.Join("~", Watching)}|{ProjectName}|{DueDate:yyyy/MM/dd}";
     }
 }

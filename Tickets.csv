@@ -1,2 +1,2 @@
-ticketID,summary,openCloseStatus,priorityLevel,sumbittedBy,assignedTo,watching
-1,This is a bug ticket,Open,High,Drew Kjell,Jane Doe,Drew Kjell|John Smith|Bill Jones
+TicketID,Summary,Status,Priority level,Submitter,Assigned to,Watching,Severity level
+2|asd|Closed|Low|asd|asd|ads|Low
