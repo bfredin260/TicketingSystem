@@ -4,10 +4,10 @@ using NLog;
 public abstract class TicketFile {
 
     // adds ticket ToString(), containing field info, to the temp file
-    public static void AddToTemp(string ticket) {
+    public static void AddToTemp(Ticket ticket) {
         StreamWriter sw = new("TempTickets.csv", append: true);
 
-        sw.WriteLine(ticket);
+        sw.WriteLine(ticket.ToString());
 
         // close stream
         sw.Close();
